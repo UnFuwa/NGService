@@ -156,6 +156,7 @@ public class RegistrationActivity extends AppCompatActivity {
             textInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
             isValidPassword = false;
         } else {
+            textInputLayoutPassword.setPasswordVisibilityToggleEnabled(true);
             isValidPassword = true;
         }
 

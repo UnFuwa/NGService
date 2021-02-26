@@ -53,7 +53,7 @@ import com.unfuwa.ngservice.model.User;
         TypeNotification.class,
 
     },
-        version = 4,
+        version = 2,
         exportSchema = false
 )
 public abstract class DatabaseApi extends RoomDatabase {

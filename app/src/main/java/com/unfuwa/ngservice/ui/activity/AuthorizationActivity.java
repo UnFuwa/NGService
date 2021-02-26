@@ -126,6 +126,7 @@ public class AuthorizationActivity extends AppCompatActivity {
             textInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
             isValidPassword = false;
         } else {
+            textInputLayoutPassword.setPasswordVisibilityToggleEnabled(true);
             isValidPassword = true;
         }
 
@@ -148,7 +149,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
                 .doOnTerminate(loadingDialog::hideLoading)
-                .subscribe(this::startNextActivity, error -> showErrorMessage());
+                .subscribe(this::startNextActivity, throwable -> showErrorMessage());
 
         compositeDisposable.add(disposable);
     }
