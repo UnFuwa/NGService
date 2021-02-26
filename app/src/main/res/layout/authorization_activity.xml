@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/LightBlack"
+    android:orientation="vertical"
+    tools:context=".ui.activity.AuthorizationActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:layout_weight="0.8">
+
+        <ImageView
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:src="@drawable/icon_logo"
+            android:layout_gravity="start"
+            tools:ignore="ContentDescription"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:fontFamily="@font/aqum"
+            android:text="Авторизация"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:layout_marginBottom="22dp"
+            android:textSize="20sp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/field_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Имя пользователя"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="textPersonName"
+                android:background="@drawable/input_field"
+                android:fontFamily="@font/aqum"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="16sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_login"
+                android:textStyle="bold"
+                android:layout_marginBottom="22dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_layout_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true"
+            android:textColorHint="#B5B5B5"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/field_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Пароль"
+                android:textColorHint="#B5B5B5"
+                android:ems="10"
+                android:inputType="textPassword"
+                android:background="@drawable/input_field"
+                android:fontFamily="@font/aqum"
+                android:textAllCaps="false"
+                android:textColor="@color/White"
+                android:paddingStart="10dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_password"
+                android:drawablePadding="13dp"
+                android:textStyle="bold"
+                android:layout_marginBottom="42dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/button_signin"
+            android:onClick="signIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/signin_button"
+            android:fontFamily="@font/aqum"
+            android:text="Войти в учетную запись"
+            android:textAllCaps="false"
+            android:textColor="#174A42"
+            android:textSize="16sp"
+            android:layout_marginBottom="60dp"
+            android:enabled="false"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:layout_weight="0.2"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B5B5B5"
+            android:fontFamily="@font/aqum"
+            android:text="У вас нет учетной записи?"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/registration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/White"
+            android:fontFamily="@font/aqum"
+            android:layout_marginTop="5dp"
+            android:onClick="startRegistrationActivity"
+            android:text="Регистрация клиента"
+            android:textAlignment="center"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

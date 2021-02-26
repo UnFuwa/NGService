@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/LightBlack"
+    android:orientation="vertical"
+    tools:context=".ui.activity.RegistrationActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_weight="0.7">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:fontFamily="@font/aqum"
+            android:text="Регистрация клиента"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:layout_marginBottom="40dp"
+            android:textSize="20sp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/field_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Электронная почта"
+            android:ems="10"
+            android:textColorHint="#B5B5B5"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/input_field"
+            android:fontFamily="@font/aqum"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:drawablePadding="13dp"
+            android:drawableStart="@drawable/ic_email"
+            android:textStyle="bold"
+            android:layout_marginBottom="40dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_layout_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true"
+            android:textColorHint="#B5B5B5"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/field_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Пароль"
+                android:textColorHint="#B5B5B5"
+                android:ems="10"
+                android:inputType="textPassword"
+                android:background="@drawable/input_field"
+                android:fontFamily="@font/aqum"
+                android:textAllCaps="false"
+                android:textColor="@color/White"
+                android:paddingStart="10dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_password"
+                android:drawablePadding="13dp"
+                android:textStyle="bold"
+                android:layout_marginBottom="40dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/field_fio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ФИО"
+            android:ems="10"
+            android:textColorHint="#B5B5B5"
+            android:inputType="textPersonName"
+            android:background="@drawable/input_field"
+            android:fontFamily="@font/aqum"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:drawablePadding="13dp"
+            android:drawableStart="@drawable/ic_login"
+            android:textStyle="bold"
+            android:layout_marginBottom="40dp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/field_telephone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Номер телефона"
+            android:ems="10"
+            android:textColorHint="#B5B5B5"
+            android:inputType="textPersonName"
+            android:background="@drawable/input_field"
+            android:fontFamily="@font/aqum"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:drawablePadding="13dp"
+            android:drawableStart="@drawable/ic_phone"
+            android:textStyle="bold"
+            android:layout_marginBottom="40dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:layout_weight="0.3"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_signup"
+            android:onClick="signUp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/signin_button"
+            android:fontFamily="@font/aqum"
+            android:text="Зарегистрироваться"
+            android:textAllCaps="false"
+            android:textColor="#174A42"
+            android:textSize="16sp"
+            android:layout_marginBottom="20dp"
+            android:enabled="false"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#B5B5B5"
+            android:fontFamily="@font/aqum"
+            android:text="У вас есть учетная запись?"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/registration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/White"
+            android:fontFamily="@font/aqum"
+            android:layout_marginTop="5dp"
+            android:onClick="startAuthorizationActivity"
+            android:text="Авторизация"
+            android:textAlignment="center"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</LinearLayout>
