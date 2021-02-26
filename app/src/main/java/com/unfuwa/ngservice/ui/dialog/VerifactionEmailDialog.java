@@ -10,6 +10,7 @@ public class VerifactionEmailDialog {
 
     private Activity activity;
     private AlertDialog alertDialog;
+    private boolean isActive;
 
     public VerifactionEmailDialog(Activity activity) {
         this.activity = activity;
@@ -28,5 +29,13 @@ public class VerifactionEmailDialog {
 
     public void hideVerification() {
         alertDialog.dismiss();
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }
