@@ -36,7 +36,7 @@ public class Client {
     @ColumnInfo(name = "OName")
     private String oName;
 
-    @Nullable
+    @NonNull
     @ColumnInfo(name = "Telephone")
     private String telephone;
 
@@ -95,12 +95,12 @@ public class Client {
         this.oName = oName;
     }
 
-    @Nullable
+    @NonNull
     public String getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(@Nullable String telephone) {
+    public void setTelephone(@NonNull String telephone) {
         this.telephone = telephone;
     }
 }

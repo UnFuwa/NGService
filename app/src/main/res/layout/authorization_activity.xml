@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/LightBlack"
     android:orientation="vertical"
-    tools:context=".ui.activity.AuthorizationActivity">
+    tools:context=".ui.activity.general.AuthorizationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

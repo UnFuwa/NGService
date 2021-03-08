@@ -2,4 +2,24 @@
     <string name="app_name">NGService</string>
     <string name="loading">Loading…</string>
     <string name="percent">0 %</string>
+
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="short_info_company_1">
+        Компания "NextGen" предоставляет услуги по сервисному обслуживанию
+        компьютерной техники, основным направлением деятельности которой
+        является - "Ремонт компьютерной техники".
+    </string>
+    <string name="short_info_company_2">
+        Занимается обслуживанием, как физических так и юридических лиц (виды любого бизнеса).
+    </string>
+    <string name="short_info_company_3">Наши преимущества:</string>
+    <string name="short_info_company_3_1">1) Высокое качество обслуживания.</string>
+    <string name="short_info_company_3_2">2) Бесплатные выезд на диагностику.</string>
+    <string name="short_info_company_3_3">3) Хорошие цены и скидки постоянным клиентам.</string>
+    <string name="short_info_company_3_4">4) Бесплатные выезд на диагностику.</string>
+    <string name="short_info_company_3_5">5) Круглосуточная тех. поддержка.</string>
 </resources>

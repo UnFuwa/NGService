@@ -7,4 +7,15 @@
         <item name="colorAccent">@color/DarkGreenCyan</item>
     </style>
 
+    <style name="TextViewStyle">
+        <item name="android:fontFamily">@font/aqum</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:textColor">@color/White</item>
+        <item name="android:textColorSecondary">@color/DarkGreenCyan</item>
+    </style>
 </resources>

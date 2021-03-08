@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/LightBlack"
     android:orientation="vertical"
-    tools:context=".ui.activity.RegistrationActivity">
+    tools:context=".ui.activity.general.RegistrationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:id="@+id/field_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Электронная почта"
+            android:hint="Электронная почта*"
             android:ems="10"
             android:textColorHint="#B5B5B5"
             android:inputType="textEmailAddress"
@@ -46,7 +46,7 @@
             android:drawablePadding="13dp"
             android:drawableStart="@drawable/ic_email"
             android:textStyle="bold"
-            android:layout_marginBottom="40dp"/>
+            android:layout_marginBottom="20dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/text_input_layout_password"
@@ -60,7 +60,7 @@
                 android:id="@+id/field_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Пароль"
+                android:hint="Пароль*"
                 android:textColorHint="#B5B5B5"
                 android:ems="10"
                 android:inputType="textPassword"
@@ -75,15 +75,15 @@
                 android:drawableStart="@drawable/ic_password"
                 android:drawablePadding="13dp"
                 android:textStyle="bold"
-                android:layout_marginBottom="40dp"/>
+                android:layout_marginBottom="20dp"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/field_fio"
+            android:id="@+id/field_f"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="ФИО"
+            android:hint="Фамилия*"
             android:ems="10"
             android:textColorHint="#B5B5B5"
             android:inputType="textPersonName"
@@ -98,13 +98,13 @@
             android:drawablePadding="13dp"
             android:drawableStart="@drawable/ic_login"
             android:textStyle="bold"
-            android:layout_marginBottom="40dp"/>
+            android:layout_marginBottom="20dp"/>
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/field_telephone"
+            android:id="@+id/field_i"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Номер телефона"
+            android:hint="Имя*"
             android:ems="10"
             android:textColorHint="#B5B5B5"
             android:inputType="textPersonName"
@@ -117,9 +117,51 @@
             android:paddingBottom="5dp"
             android:textSize="16sp"
             android:drawablePadding="13dp"
+            android:drawableStart="@drawable/ic_login"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/field_o"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Отчество"
+            android:ems="10"
+            android:textColorHint="#B5B5B5"
+            android:inputType="textPersonName"
+            android:background="@drawable/input_field"
+            android:fontFamily="@font/aqum"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:drawablePadding="13dp"
+            android:drawableStart="@drawable/ic_login"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/field_telephone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Номер телефона*"
+            android:ems="10"
+            android:textColorHint="#B5B5B5"
+            android:inputType="phone"
+            android:background="@drawable/input_field"
+            android:fontFamily="@font/aqum"
+            android:textColor="@color/White"
+            android:textAllCaps="false"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:drawablePadding="13dp"
             android:drawableStart="@drawable/ic_phone"
             android:textStyle="bold"
-            android:layout_marginBottom="40dp"/>
+            android:layout_marginBottom="40dp" />
 
     </LinearLayout>
 

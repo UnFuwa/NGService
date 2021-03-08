@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/ToolbarTheme"
+    android:background="@color/DarkBlack"
+    android:elevation="4dp"
+    android:gravity="center"
+    app:navigationIcon="@drawable/ic_main_client_menu">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Главная"
+        android:layout_gravity="center"
+        android:textColor="@color/White"
+        android:textSize="18sp"
+        android:textAllCaps="false"
+        android:fontFamily="@font/aqum" />
+
+</com.google.android.material.appbar.MaterialToolbar>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="MenuTitle" >
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_item_home"
+            android:onClick="changeFragmentHome"/>
+
+        <item
+            android:id="@+id/list_service"
+            android:icon="@drawable/ic_item_list_service"
+            android:onClick="changeFragmentServiceCenters"/>
+
+        <item
+            android:id="@+id/status_repair"
+            android:icon="@drawable/ic_item_status_repair"
+            android:onClick="changeFragmentStatusRepair"/>
+
+        <item
+            android:id="@+id/request"
+            android:icon="@drawable/ic_item_request"
+            android:onClick="changeFragmentRequest"/>
+    </group>
+
+</menu>

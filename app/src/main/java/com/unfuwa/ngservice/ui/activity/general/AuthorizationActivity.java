@@ -1,4 +1,4 @@
-package com.unfuwa.ngservice.ui.activity;
+package com.unfuwa.ngservice.ui.activity.general;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +14,7 @@ import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.dao.UserDao;
 import com.unfuwa.ngservice.model.User;
+import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
 import com.unfuwa.ngservice.util.DatabaseApi;
 
@@ -33,7 +34,7 @@ public class AuthorizationActivity extends AppCompatActivity {
     private TextInputEditText fieldLogin;
     private TextInputEditText fieldPassword;
     private Button buttonSignIn;
-    private final LoadingDialog loadingDialog = new LoadingDialog(AuthorizationActivity.this);
+    private final LoadingDialog loadingDialog = new LoadingDialog(this);
 
     private static final String CACHE_NAME = "token.txt";
     private String CACHE_PATH;
@@ -104,10 +105,10 @@ public class AuthorizationActivity extends AppCompatActivity {
             fieldLogin.setError("Вы не ввели значение логина или эл.почты!");
             isValidLogin = false;
         } else if (loginField.length() < 4) {
-            fieldLogin.setError("Логин (эл.почта) должен состоять из 4 или более символов!");
+            fieldLogin.setError("Логин (имя почтового ящика) должен состоять из 4 или более символов!");
             isValidLogin = false;
         } else if (loginField.length() > 45) {
-            fieldLogin.setError("Логин (эл.почта) не должен превышать 45 символов!");
+            fieldLogin.setError("Логин (эл.почты) не должен превышать 45 символов!");
             isValidLogin = false;
         } else {
             isValidLogin = true;
@@ -117,8 +118,8 @@ public class AuthorizationActivity extends AppCompatActivity {
             fieldPassword.setError("Вы не ввели значение пароля!");
             textInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
             isValidPassword = false;
-        } else if (passwordField.length() < 4) {
-            fieldPassword.setError("Пароль должен состоять из 4 или более символов!");
+        } else if (passwordField.length() < 6) {
+            fieldPassword.setError("Пароль должен состоять из 6 или более символов!");
             textInputLayoutPassword.setPasswordVisibilityToggleEnabled(false);
             isValidPassword = false;
         } else if (passwordField.length() > 25 ) {
@@ -170,12 +171,12 @@ public class AuthorizationActivity extends AppCompatActivity {
 
             switch (user.getNameAccessRight()) {
                 case "Client":
-                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();;
-                    //intent = new Intent(this, );
-                    //startActivity(intent);
+                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+                    intent = new Intent(this, MainClientActivity.class);
+                    startActivity(intent);
                     break;
                 case "Specialist":
-                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();;
+                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();
                     //intent = new Intent(this, );
                     //startActivity(intent);
                     break;

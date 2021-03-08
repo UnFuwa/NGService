@@ -1,4 +1,4 @@
-package com.unfuwa.ngservice.ui.activity;
+package com.unfuwa.ngservice.ui.activity.general;
 
 import androidx.appcompat.app.AppCompatActivity;
 

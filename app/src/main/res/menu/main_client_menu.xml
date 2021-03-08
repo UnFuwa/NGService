@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/home"
+            android:title="Главная"
+            android:icon="@drawable/ic_item_home"
+            android:onClick="changeFragmentHome"/>
+
+        <item
+            android:id="@+id/list_service"
+            android:title="Cервис центры"
+            android:icon="@drawable/ic_item_list_service"
+            android:onClick="changeFragmentServiceCenters"/>
+
+        <item
+            android:id="@+id/status_repair"
+            android:title="Статус ремонта"
+            android:icon="@drawable/ic_item_status_repair"
+            android:onClick="changeFragmentStatusRepair"/>
+
+        <item
+            android:id="@+id/request"
+            android:title="Заявка"
+            android:icon="@drawable/ic_item_request"
+            android:onClick="changeFragmentRequest"/>
+
+    </group>
+
+    <item android:title="">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/logout"
+                    android:title="Выход"
+                    android:icon="@drawable/ic_item_logout"
+                    android:onClick="logout"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+</menu>
