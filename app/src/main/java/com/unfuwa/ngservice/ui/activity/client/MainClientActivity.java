@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -23,8 +24,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.FrameLayout;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -32,18 +32,27 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.RequestDao;
+import com.unfuwa.ngservice.dao.UserClientDao;
+import com.unfuwa.ngservice.model.Client;
+import com.unfuwa.ngservice.model.Request;
 import com.unfuwa.ngservice.ui.activity.general.AuthorizationActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
+import com.unfuwa.ngservice.ui.fragment.client.GoogleMapsFragment;
 import com.unfuwa.ngservice.ui.fragment.client.MainClientFragment;
 import com.unfuwa.ngservice.ui.fragment.client.RequestFragment;
 import com.unfuwa.ngservice.ui.fragment.client.ServiceCentersFragment;
 import com.unfuwa.ngservice.ui.fragment.client.StatusRepairFragment;
+import com.unfuwa.ngservice.util.DatabaseApi;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -53,7 +62,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MainClientActivity extends AppCompatActivity {
 
-    private int CALL_PHONE_PERMISSION = 1;
+    private final int CALL_PHONE_PERMISSION = 1;
+    private final int ACCESS_FINE_LOCATION_PERMISSION = 1;
+
     private static final String NUMBER_CALL_PHONE = "81234567890";
 
     private static final String CACHE_NAME = "token.txt";
@@ -61,9 +72,9 @@ public class MainClientActivity extends AppCompatActivity {
     private String token;
     private File file;
 
-    private TextInputEditText fieldAddress;
-    private TextInputEditText fieldDescription;
-    private TextInputEditText fieldDateArrive;
+    private EditText fieldAddress;
+    private EditText fieldDescription;
+    private EditText fieldDateArrive;
     private Button buttonSendRequest;
     private final LoadingDialog loadingDialog = new LoadingDialog(this);
     private DatePickerDialog.OnDateSetListener dateSetListener;
@@ -71,32 +82,39 @@ public class MainClientActivity extends AppCompatActivity {
     private Observable<Boolean> validFields;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    private DatabaseApi dbApi;
+
     private boolean isValidAddress;
     private boolean isValidDescription;
     private boolean isValidDateArrive;
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private BottomNavigationView navigationViewButtom;
+    private BottomNavigationView navigationViewBottom;
     private Toolbar toolbar;
 
-    private FrameLayout fragmentContainer;
-    private Fragment fragment;
+    private Fragment activeFragment;
+    private FragmentManager fragmentManager;
+    private MainClientFragment mainClientFragment;
+    private RequestFragment requestFragment;
+    private GoogleMapsFragment googleMapsFragment;
+    private ServiceCentersFragment serviceCentersFragment;
+    private StatusRepairFragment statusRepairFragment;
 
     private void initComponents() {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_main_client);
-        navigationViewButtom = findViewById(R.id.nav_main_client_bottom);
+        navigationViewBottom = findViewById(R.id.nav_main_client_bottom);
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        fragment = new MainClientFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .commit();
+        mainClientFragment = new MainClientFragment();
+        requestFragment = new RequestFragment();
+        googleMapsFragment = new GoogleMapsFragment();
+        serviceCentersFragment = new ServiceCentersFragment();
+        statusRepairFragment = new StatusRepairFragment();
     }
 
     @Override
@@ -105,6 +123,8 @@ public class MainClientActivity extends AppCompatActivity {
         setContentView(R.layout.main_client_activity);
 
         CACHE_PATH = getApplicationContext().getDataDir().getPath() + "/" + CACHE_NAME;
+
+        dbApi = DatabaseApi.getInstance(getApplicationContext());
 
         initComponents();
 
@@ -124,35 +144,29 @@ public class MainClientActivity extends AppCompatActivity {
         toggle.syncState();
 
         navigationView.bringToFront();
-        navigationViewButtom.bringToFront();
+        navigationViewBottom.bringToFront();
+    }
 
-        Observable<String> addressField = RxTextView.textChanges(address)
-                .skip(1)
-                .map(charSequence -> charSequence.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        Observable<String> descriptionField = RxTextView.textChanges(description)
-                .skip(1)
-                .map(charSequence -> charSequence.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
+        fragmentManager = getSupportFragmentManager();
 
-        Observable<String> dateArriveField = RxTextView.textChanges(dateArrive)
-                .skip(1)
-                .map(charSequence -> charSequence.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container, mainClientFragment, "MainClient")
+                .add(R.id.fragment_container, requestFragment, "Request")
+                .add(R.id.fragment_container, googleMapsFragment, "GoogleMaps")
+                .add(R.id.fragment_container, serviceCentersFragment, "ServiceCenters")
+                .add(R.id.fragment_container, statusRepairFragment, "StatusRepair")
+                .show(mainClientFragment)
+                .hide(requestFragment)
+                .hide(googleMapsFragment)
+                .hide(serviceCentersFragment)
+                .hide(statusRepairFragment)
+                .commit();
 
-        Disposable disposable = validFields.combineLatest(addressField, descriptionField, dateArriveField, this::isValidationFields)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::enabledSendRequest);
-
-        compositeDisposable.add(disposable);
+        activeFragment = mainClientFragment;
     }
 
     @Override
@@ -164,35 +178,44 @@ public class MainClientActivity extends AppCompatActivity {
 
     private void enabledSendRequest(boolean validFields) {
         if (validFields) {
-            sendRequest.setEnabled(true);
+            buttonSendRequest.setEnabled(true);
         } else {
-            sendRequest.setEnabled(false);
+            buttonSendRequest.setEnabled(false);
         }
     }
 
     private boolean isValidationFields(String addressField, String descriptionField, String dateArriveField) {
-        isValidAddress = !addressField.isEmpty();
-
-        if (!isValidAddress) {
-            address.setError("Вы не ввели значение адреса!");
+        if (addressField.isEmpty()) {
+            fieldAddress.setError("Вы не ввели значение адреса!");
+            isValidAddress = false;
+        } else if (addressField.length() > 200) {
+            fieldAddress.setError("Количество символов превышает отметку в 200 знаков!");
+            isValidAddress = false;
+        } else {
+            isValidAddress = true;
         }
 
-        isValidDescription = !descriptionField.isEmpty();
-
-        if (!isValidDescription) {
-            description.setError("Вы не ввели описание!");
+        if (descriptionField.isEmpty()) {
+            fieldDescription.setError("Вы не ввели описание!");
+            isValidDescription = false;
+        } else if (descriptionField.length() > 400) {
+            fieldDescription.setError("Количество символов превышает отметку в 400 знаков!");
+            isValidDescription = false;
+        } else {
+            isValidDescription = true;
         }
 
-        isValidDateArrive = !dateArriveField.isEmpty();
-
-        if (!isValidDateArrive) {
-            dateArrive.setError("Вы не ввели значение даты оказания услуги!");
+        if (dateArriveField.isEmpty()) {
+            fieldDateArrive.setError("Вы не ввели значение даты оказания услуги!");
+            isValidDateArrive = false;
+        } else {
+            isValidDateArrive = true;
         }
 
         return isValidAddress && isValidDescription && isValidDateArrive;
     }
 
-    public void runSendRequest(View view) {
+    public void startSendRequest(View view) {
         UserClientDao userClientDao = dbApi.userClientDao();
 
         Disposable disposable = userClientDao.getEmailClientByToken(token)
@@ -205,24 +228,25 @@ public class MainClientActivity extends AppCompatActivity {
 
     private void sendRequest(Client client) {
         String emailClient = client.getEmail();
-        String addressIn = address.getText().toString();
-        String descriptionIn = description.getText().toString();
-        String dateArriveIn = dateArrive.getText().toString();
+        String address = fieldAddress.getText().toString();
+        String description = fieldDescription.getText().toString();
+        String dateArrive = fieldDateArrive.getText().toString();
 
         RequestDao requestDao = dbApi.requestDao();
 
         Date dateNow = new Date();
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
-        String formatDate = dateFormat.format(dateNow) + " " + timeFormat.format(dateNow);
+        String formatDate = dateFormat.format(dateNow);
 
-        Request request = new Request(emailClient, addressIn, descriptionIn, dateArriveIn, formatDate);
+        Request request = new Request(emailClient, address, description, dateArrive, formatDate);
 
         Disposable disposable = requestDao.insert(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showMessageSuccess, error -> showMessageError());
+                .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                .doOnTerminate(loadingDialog::hideLoading)
+                .subscribe(this::showMessageSuccess, throwable -> showMessageError());
 
         compositeDisposable.add(disposable);
     }
@@ -247,46 +271,77 @@ public class MainClientActivity extends AppCompatActivity {
     public void changeFragmentHome(MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        fragment = new MainClientFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(mainClientFragment)
                 .commit();
+
+        activeFragment = mainClientFragment;
     }
 
     public void changeFragmentServiceCenters(MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        fragment = new ServiceCentersFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(serviceCentersFragment)
                 .commit();
+
+        activeFragment = serviceCentersFragment;
     }
 
     public void changeFragmentStatusRepair(MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        fragment = new StatusRepairFragment();
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(statusRepairFragment)
                 .commit();
+
+        activeFragment = statusRepairFragment;
     }
 
     public void changeFragmentRequest(MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        fragment = new RequestFragment();
-
-        fieldAddress = fragment.getView().findViewById(R.id.field_address);
-        fieldDescription = fragment.getView().findViewById(R.id.field_description);
-        fieldDateArrive = fragment.getView().findViewById(R.id.field_date_arrive);
-        buttonSendRequest = fragment.getView().findViewById(R.id.button_send_request);
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(requestFragment)
                 .commit();
+
+        activeFragment = requestFragment;
+
+        fieldAddress = findViewById(R.id.field_address);
+        fieldDescription = findViewById(R.id.field_description);
+        fieldDateArrive = findViewById(R.id.field_date_arrive);
+
+        Observable<String> addressField = RxTextView.textChanges(fieldAddress)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> descriptionField = RxTextView.textChanges(fieldDescription)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> dateArriveField = RxTextView.textChanges(fieldDateArrive)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Disposable disposable = validFields.combineLatest(addressField, descriptionField, dateArriveField, this::isValidationFields)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledSendRequest);
+
+        compositeDisposable.add(disposable);
     }
 
     public void logout(MenuItem item) {
@@ -363,6 +418,12 @@ public class MainClientActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(getApplicationContext(), "Разрешение отклонено!", Toast.LENGTH_SHORT).show();
             }
+        } else if (requestCode == ACCESS_FINE_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getApplicationContext(), "Разрешение получено!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Разрешение отклонено!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -377,10 +438,43 @@ public class MainClientActivity extends AppCompatActivity {
         datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         datePickerDialog.show();
 
-        dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                fieldDateArrive.setText(dayOfMonth + "." + month + "." + year);
+        dateSetListener = (view1, year1, month1, dayOfMonth) -> {
+            if (dayOfMonth < 10 && month1 < 10) {
+                fieldDateArrive.setText("0" + dayOfMonth + "." + "0" + month1 + "." + year1);
+            } else if (dayOfMonth < 10) {
+                fieldDateArrive.setText("0" + dayOfMonth + "." + month1 + "." + year1);
+            } else if (month1 < 10) {
+                fieldDateArrive.setText(dayOfMonth + "." + "0" + month1 + "." + year1);
+            } else {
+                fieldDateArrive.setText(dayOfMonth + "." + month1 + "." + year1);
+            }
+        };
+    }
+
+    public void selectPlace(View view) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), "Разрешение приложению было предоставлено!", Toast.LENGTH_SHORT).show();
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Разрешения приложения")
+                        .setMessage("Это разрешение необходимо для выполнения данной функциональности!")
+                        .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(MainClientActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
+                            }
+                        })
+                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create()
+                        .show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
             }
         }
     }

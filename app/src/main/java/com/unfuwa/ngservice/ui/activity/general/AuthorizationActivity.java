@@ -63,6 +63,8 @@ public class AuthorizationActivity extends AppCompatActivity {
 
         CACHE_PATH = getApplicationContext().getDataDir().getPath() + "/" + CACHE_NAME;
 
+        dbApi = DatabaseApi.getInstance(getApplicationContext());
+
         Observable<String> loginField = RxTextView.textChanges(fieldLogin)
                 .skip(1)
                 .map(CharSequence::toString)
@@ -140,7 +142,6 @@ public class AuthorizationActivity extends AppCompatActivity {
 
         User userIn = new User(loginIn, passwordIn);
 
-        dbApi = DatabaseApi.getInstance(getApplicationContext());
         UserDao userDao = dbApi.userDao();
 
         Disposable disposable = userDao.getUserByLogin(userIn.getLogin())

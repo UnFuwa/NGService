@@ -2,23 +2,24 @@ package com.unfuwa.ngservice.ui.fragment.client;
 
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
-import com.google.android.material.textfield.TextInputEditText;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.unfuwa.ngservice.R;
 
 public class RequestFragment extends Fragment {
 
     private View view;
 
-    private TextInputEditText fieldAddress;
-    private TextInputEditText fieldDescription;
-    private TextInputEditText fieldDateArrive;
+    private EditText fieldAddress;
+    private EditText fieldDescription;
+    private EditText fieldDateArrive;
     private Button buttonSendRequest;
 
     private void initComponents() {
@@ -34,11 +35,16 @@ public class RequestFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.request_fragment, container, false);
         initComponents();
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initComponents();
     }
 }

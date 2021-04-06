@@ -27,53 +27,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="400dp"
+            android:padding="10dp"
             android:orientation="vertical"
             android:background="@drawable/custom_block_fragment">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:id="@+id/field_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Адрес"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="text"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_place"
-                android:layout_marginBottom="20dp"/>
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/field_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Описание проблемы"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="text"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_place"
-                android:layout_marginBottom="20dp"/>
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/field_date_arrive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Дата оказания услуги"
-                android:onClick="selectDate"
+                android:onClick="selectPlace"
                 android:editable="false"
                 android:ems="10"
                 android:textColorHint="#B5B5B5"
@@ -87,11 +50,59 @@
                 android:textSize="14sp"
                 android:drawablePadding="13dp"
                 android:drawableStart="@drawable/ic_place"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <EditText
+                android:id="@+id/field_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Описание проблемы"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="textMultiLine"
+                android:minLines="8"
+                android:maxLines="12"
+                android:scrollbars="vertical"
+                android:gravity="top|left"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_description"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <EditText
+                android:id="@+id/field_date_arrive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Дата оказания услуги"
+                android:onClick="selectDate"
+                android:editable="false"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="date"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_date_service"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
 
             <Button
                 android:id="@+id/button_send_request"
-                android:onClick="sendRequest"
+                android:onClick="startSendRequest"
                 android:layout_width="170dp"
                 android:layout_height="40dp"
                 android:layout_marginRight="18dp"
