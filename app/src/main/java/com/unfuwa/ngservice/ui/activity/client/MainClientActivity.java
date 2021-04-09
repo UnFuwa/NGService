@@ -1,6 +1,7 @@
 package com.unfuwa.ngservice.ui.activity.client;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -19,17 +20,37 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.textfield.TextInputEditText;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.dao.RequestDao;
@@ -51,19 +72,25 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import kotlin.collections.ArraysKt;
 
 public class MainClientActivity extends AppCompatActivity {
 
     private final int CALL_PHONE_PERMISSION = 1;
     private final int ACCESS_FINE_LOCATION_PERMISSION = 1;
+    private final int ACCESS_FINE_COARSE_PERMISSION = 1;
+    private final int ACCESS_LOCATION_PERMISSION = 1;
 
     private static final String NUMBER_CALL_PHONE = "81234567890";
 
@@ -75,9 +102,19 @@ public class MainClientActivity extends AppCompatActivity {
     private EditText fieldAddress;
     private EditText fieldDescription;
     private EditText fieldDateArrive;
+    private DatePickerDialog.OnDateSetListener dateSetListener;
     private Button buttonSendRequest;
     private final LoadingDialog loadingDialog = new LoadingDialog(this);
-    private DatePickerDialog.OnDateSetListener dateSetListener;
+
+    private EditText fieldSearch;
+    private Place place;
+    private PlacesClient placesClient;
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private List<Place.Field> fields;
+
+    private ImageView iconMyLocation;
+    private GoogleMap googleMap;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     private Observable<Boolean> validFields;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -112,7 +149,7 @@ public class MainClientActivity extends AppCompatActivity {
 
         mainClientFragment = new MainClientFragment();
         requestFragment = new RequestFragment();
-        googleMapsFragment = new GoogleMapsFragment();
+        googleMapsFragment = new GoogleMapsFragment(getApplicationContext(), this);
         serviceCentersFragment = new ServiceCentersFragment();
         statusRepairFragment = new StatusRepairFragment();
     }
@@ -165,6 +202,10 @@ public class MainClientActivity extends AppCompatActivity {
                 .hide(serviceCentersFragment)
                 .hide(statusRepairFragment)
                 .commit();
+
+        Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
+        placesClient = Places.createClient(getApplicationContext());
+        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
 
         activeFragment = mainClientFragment;
     }
@@ -454,6 +495,18 @@ public class MainClientActivity extends AppCompatActivity {
     public void selectPlace(View view) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(getApplicationContext(), "Разрешение приложению было предоставлено!", Toast.LENGTH_SHORT).show();
+
+            fragmentManager.beginTransaction()
+                    .hide(activeFragment)
+                    .show(googleMapsFragment)
+                    .commit();
+
+            fieldSearch = findViewById(R.id.field_search_maps);
+            iconMyLocation = findViewById(R.id.ic_my_location);
+
+            googleMap = googleMapsFragment.getGoogleMap();
+
+            activeFragment = googleMapsFragment;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 new AlertDialog.Builder(this)
@@ -462,7 +515,7 @@ public class MainClientActivity extends AppCompatActivity {
                         .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(MainClientActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
+                                ActivityCompat.requestPermissions(MainClientActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_LOCATION_PERMISSION);
                             }
                         })
                         .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -474,7 +527,74 @@ public class MainClientActivity extends AppCompatActivity {
                         .create()
                         .show();
             } else {
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_LOCATION_PERMISSION);
+            }
+        }
+    }
+
+    public void searchLocation(View view) {
+        Geocoder geocoder = new Geocoder(getApplicationContext());
+        List<Address> list;
+
+        try {
+            list = geocoder.getFromLocationName(fieldSearch.getText().toString(), 1);
+
+            Address address = list.get(0);
+            LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+
+            googleMap.clear();
+
+            googleMap.addMarker(new MarkerOptions().position(location).title(address.getAddressLine(0)));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getMyLocation(View view) {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
+        try {
+            fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful()) {
+                        Location currentLocation = (Location) task.getResult();
+                        LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+                        googleMap.clear();
+
+                        googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Возникла ошибка при определении местоположения!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void startAutoCompletePlace(View view) {
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                .build(getApplicationContext());
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                place = Autocomplete.getPlaceFromIntent(data);
+                fieldSearch.setText(place.getAddress());
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.i("STATUS", status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+
             }
         }
     }

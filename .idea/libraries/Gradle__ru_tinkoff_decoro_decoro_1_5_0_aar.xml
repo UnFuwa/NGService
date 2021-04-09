@@ -1,9 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: ru.tinkoff.decoro:decoro:1.5.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/650bc5cdc73fa0299f1bff6640f23a4d/jetified-decoro-1.5.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/650bc5cdc73fa0299f1bff6640f23a4d/jetified-decoro-1.5.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/650bc5cdc73fa0299f1bff6640f23a4d/jetified-decoro-1.5.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/19a4ea313ff409f1f3c3645b7f460bbc/jetified-decoro-1.5.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/3781bfdec55fcc09d547f4a94d1ce188/jetified-decoro-1.5.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/96d629ca75dacf760b1bfca8e101a4b0/jetified-decoro-1.5.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/96d629ca75dacf760b1bfca8e101a4b0/jetified-decoro-1.5.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/96d629ca75dacf760b1bfca8e101a4b0/jetified-decoro-1.5.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ru.tinkoff.decoro/decoro/1.5.0/35a11f147e376679be59fe5f52687cc8052d426/decoro-1.5.0-javadoc.jar!/" />
