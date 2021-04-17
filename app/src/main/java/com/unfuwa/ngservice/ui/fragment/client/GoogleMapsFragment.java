@@ -53,32 +53,20 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
 
-    private EditText fieldSearch;
-    private ImageView iconMyLocation;
-
     private Context context;
     private View view;
     private GoogleMap googleMap;
     private MainClientActivity mainClientActivity;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     public GoogleMapsFragment(Context context, MainClientActivity mainClientActivity) {
         this.context = context;
         this.mainClientActivity = mainClientActivity;
     }
 
-    private void initComponents() {
-        fieldSearch = view.findViewById(R.id.field_search_maps);
-        iconMyLocation = view.findViewById(R.id.ic_my_location);
-    }
-
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.google_maps_fragment, container, false);
-        //initComponents();
         return view;
     }
 
@@ -90,20 +78,6 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        //initComponents();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        compositeDisposable.dispose();
-    }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -126,7 +100,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
             fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener() {
                 @Override
                 public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful()) {
+                    if (task.isSuccessful() && task.getResult() != null) {
                         Location currentLocation = (Location) task.getResult();
                         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));

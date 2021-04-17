@@ -105,7 +105,6 @@
                 android:onClick="startSendRequest"
                 android:layout_width="170dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="18dp"
                 android:background="@drawable/signin_button"
                 android:fontFamily="@font/aqum"
                 android:text="Отправить заявку"

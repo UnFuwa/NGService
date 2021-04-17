@@ -12,7 +12,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.ClientDao;
+import com.unfuwa.ngservice.dao.SpecialistDao;
 import com.unfuwa.ngservice.dao.UserDao;
+import com.unfuwa.ngservice.extendedmodel.ClientUser;
+import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
+import com.unfuwa.ngservice.model.Client;
+import com.unfuwa.ngservice.model.Specialist;
 import com.unfuwa.ngservice.model.User;
 import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
@@ -157,7 +163,7 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     public void startNextActivity(User user) {
-        Intent intent;
+        Disposable disposable;
 
         File file = new File(CACHE_PATH);
 
@@ -172,19 +178,45 @@ public class AuthorizationActivity extends AppCompatActivity {
 
             switch (user.getNameAccessRight()) {
                 case "Client":
-                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
-                    intent = new Intent(this, MainClientActivity.class);
-                    startActivity(intent);
+                    ClientDao clientDao = dbApi.clientDao();
+
+                    disposable = clientDao.getClientByEmail(user.getLogin())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
+
+                    compositeDisposable.add(disposable);
                     break;
                 case "Specialist":
-                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();
-                    //intent = new Intent(this, );
-                    //startActivity(intent);
+                    SpecialistDao specialistDao = dbApi.specialistDao();
+
+                    disposable = specialistDao.getSpecialistByUser(user.getLogin())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::startMainSpecialistActivity, throwable -> showErrorMessage());
+
+                    compositeDisposable.add(disposable);
                     break;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void startMainClientActivity(ClientUser client) {
+        Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, MainClientActivity.class);
+        intent.putExtra("client", client);
+        startActivity(intent);
+        finish();
+    }
+
+    private void startMainSpecialistActivity(SpecialistUser specialist) {
+        Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();
+        //Intent intent = new Intent(this, MainSpecialistActivity.class);
+        //intent.putExtra("specialist", specialist);
+        //startActivity(intent);
+        finish();
     }
 
     public void showErrorMessage() {
@@ -194,5 +226,6 @@ public class AuthorizationActivity extends AppCompatActivity {
     public void startRegistrationActivity(View view) {
         Intent intent = new Intent(this, RegistrationActivity.class);
         startActivity(intent);
+        finish();
     }
 }

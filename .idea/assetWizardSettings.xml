@@ -43,6 +43,18 @@
                                           </PersistentState>
                                         </value>
                                       </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                                <entry key="opacityPercent" value="80" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
                                       <entry key="text">
                                         <value>
                                           <PersistentState>
@@ -324,7 +336,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/description/baseline_description_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/hardware/baseline_hardware_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -335,7 +347,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="181818" />
-                            <entry key="outputName" value="ic_baseline_description_24" />
+                            <entry key="outputName" value="ic_name_equipment" />
                             <entry key="sourceFile" value="D:\ProjectsAndroid\NGService" />
                           </map>
                         </option>

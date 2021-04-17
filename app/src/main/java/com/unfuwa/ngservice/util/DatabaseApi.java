@@ -6,7 +6,12 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.unfuwa.ngservice.dao.ClientDao;
+import com.unfuwa.ngservice.dao.EquipmentDao;
+import com.unfuwa.ngservice.dao.FilialCityDao;
+import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.RequestDao;
+import com.unfuwa.ngservice.dao.SpecialistDao;
 import com.unfuwa.ngservice.dao.UserClientDao;
 import com.unfuwa.ngservice.dao.UserDao;
 import com.unfuwa.ngservice.model.AccessRight;
@@ -53,7 +58,7 @@ import com.unfuwa.ngservice.model.User;
         TypeNotification.class,
 
     },
-        version = 2,
+        version = 3,
         exportSchema = false
 )
 public abstract class DatabaseApi extends RoomDatabase {
@@ -61,6 +66,11 @@ public abstract class DatabaseApi extends RoomDatabase {
     public abstract UserDao userDao();
     public abstract RequestDao requestDao();
     public abstract UserClientDao userClientDao();
+    public abstract FilialCityDao filialCityDao();
+    public abstract EquipmentDao equipmentDao();
+    public abstract RegServiceDao regServiceDao();
+    public abstract ClientDao clientDao();
+    public abstract SpecialistDao specialistDao();
 
     private static DatabaseApi INSTANCE;
 

@@ -72,4 +72,18 @@
         android:layout_marginTop="10dp"
         android:scaleType="centerCrop"/>
 
+    <Button
+        android:id="@+id/button_select_location"
+        android:onClick="selectLocation"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/select_place_button"
+        android:fontFamily="@font/aqum"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:text="Выбрать местоположение"
+        android:textAllCaps="false"
+        android:textColor="#174A42"
+        android:textSize="12sp"/>
+
 </RelativeLayout>

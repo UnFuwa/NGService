@@ -32,6 +32,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
@@ -53,9 +54,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.RequestDao;
 import com.unfuwa.ngservice.dao.UserClientDao;
+import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.model.Client;
+import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.Request;
 import com.unfuwa.ngservice.ui.activity.general.AuthorizationActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
@@ -88,8 +92,6 @@ import kotlin.collections.ArraysKt;
 public class MainClientActivity extends AppCompatActivity {
 
     private final int CALL_PHONE_PERMISSION = 1;
-    private final int ACCESS_FINE_LOCATION_PERMISSION = 1;
-    private final int ACCESS_FINE_COARSE_PERMISSION = 1;
     private final int ACCESS_LOCATION_PERMISSION = 1;
 
     private static final String NUMBER_CALL_PHONE = "81234567890";
@@ -98,6 +100,12 @@ public class MainClientActivity extends AppCompatActivity {
     private String CACHE_PATH;
     private String token;
     private File file;
+
+    private ClientUser client;
+
+    private DatabaseApi dbApi;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private EditText fieldAddress;
     private EditText fieldDescription;
@@ -113,22 +121,34 @@ public class MainClientActivity extends AppCompatActivity {
     private List<Place.Field> fields;
 
     private ImageView iconMyLocation;
+    private Address address;
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    private Observable<Boolean> validFields;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-
-    private DatabaseApi dbApi;
+    private Observable<Boolean> validFieldsRequestFragment;
 
     private boolean isValidAddress;
     private boolean isValidDescription;
     private boolean isValidDateArrive;
 
+    private ImageView iconStatusRepair;
+    private TextView labelStatusRepair;
+    private EditText fieldIdEquipment;
+    private EditText fieldNameEquipment;
+    private EditText fieldTypeEquipment;
+    private EditText fieldDescriptionStatus;
+    private Button buttonUpdateStatusRepair;
+    private Button buttonListRegService;
+
+    private Observable<Boolean> validFieldsStatusRepairFragment;
+
+    private boolean isValidIdEquipment;
+
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private BottomNavigationView navigationViewBottom;
     private Toolbar toolbar;
+    private TextView nameFragment;
 
     private Fragment activeFragment;
     private FragmentManager fragmentManager;
@@ -143,6 +163,7 @@ public class MainClientActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.nav_main_client);
         navigationViewBottom = findViewById(R.id.nav_main_client_bottom);
         toolbar = findViewById(R.id.toolbar);
+        nameFragment = findViewById(R.id.client_name_fragment);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -150,7 +171,7 @@ public class MainClientActivity extends AppCompatActivity {
         mainClientFragment = new MainClientFragment();
         requestFragment = new RequestFragment();
         googleMapsFragment = new GoogleMapsFragment(getApplicationContext(), this);
-        serviceCentersFragment = new ServiceCentersFragment();
+        serviceCentersFragment = new ServiceCentersFragment(getApplicationContext(), this);
         statusRepairFragment = new StatusRepairFragment();
     }
 
@@ -174,6 +195,10 @@ public class MainClientActivity extends AppCompatActivity {
             while((token = readFile.readLine()) != null) readFile.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (getIntent().getSerializableExtra("client") != null) {
+            client = (ClientUser) getIntent().getSerializableExtra("client");
         }
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -217,6 +242,175 @@ public class MainClientActivity extends AppCompatActivity {
         compositeDisposable.dispose();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void changeFragmentHome(MenuItem item) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(mainClientFragment)
+                .commit();
+
+        activeFragment = mainClientFragment;
+
+        nameFragment.setText("Главная");
+    }
+
+    public void changeFragmentServiceCenters(MenuItem item) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(serviceCentersFragment)
+                .commit();
+
+        activeFragment = serviceCentersFragment;
+
+        nameFragment.setText("Сервис центры");
+    }
+
+    public void changeFragmentStatusRepair(MenuItem item) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(statusRepairFragment)
+                .commit();
+
+        activeFragment = statusRepairFragment;
+
+        nameFragment.setText("Статус ремонта");
+
+        iconStatusRepair = findViewById(R.id.icon_status_repair);
+        labelStatusRepair = findViewById(R.id.output_status_repair);
+        fieldIdEquipment = findViewById(R.id.field_id_equipment);
+        fieldNameEquipment = findViewById(R.id.field_name_equipment);
+        fieldTypeEquipment = findViewById(R.id.field_type_equipment);
+        fieldDescriptionStatus = findViewById(R.id.field_description_status);
+        buttonUpdateStatusRepair = findViewById(R.id.button_update_status_repair);
+        buttonListRegService = findViewById(R.id.button_list_regservice);
+
+        Observable<String> idEquipmentField = RxTextView.textChanges(fieldIdEquipment)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Disposable disposable = idEquipmentField
+                .map(this::isValidationFieldsStatusRepairFragment)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledUpdateStatusRepair);
+
+        compositeDisposable.add(disposable);
+    }
+
+    private void enabledUpdateStatusRepair(boolean validFields) {
+        if (validFields) {
+            buttonUpdateStatusRepair.setEnabled(true);
+            buttonListRegService.setEnabled(true);
+        } else {
+            buttonUpdateStatusRepair.setEnabled(false);
+            buttonListRegService.setEnabled(false);
+        }
+    }
+
+    private boolean isValidationFieldsStatusRepairFragment(String idEquipmentField) {
+        if (idEquipmentField.isEmpty()) {
+            fieldIdEquipment.setError("Вы не ввели значение идентификатора оборудования!");
+            isValidIdEquipment = false;
+        } else {
+            isValidIdEquipment = true;
+        }
+
+        return isValidIdEquipment;
+    }
+
+    public void getStatusRepairEquipment(View view) {
+        EquipmentDao equipmentDao = dbApi.equipmentDao();
+
+        Disposable disposable = equipmentDao.getEquipmentById(Integer.parseInt(fieldIdEquipment.getText().toString()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                .doOnTerminate(loadingDialog::hideLoading)
+                .subscribe(this::showMessageSuccessStatusRepair, throwable -> showMessageErrorStatusRepair());;
+    }
+
+    private void showMessageSuccessStatusRepair(Equipment equipment) {
+        if (equipment.isStatusRepair()) {
+            iconStatusRepair.setImageResource(R.drawable.ic_status_repair_is_done);
+            labelStatusRepair.setText("Исправлено");
+        } else {
+            iconStatusRepair.setImageResource(R.drawable.ic_status_repair_is_not_done);
+            labelStatusRepair.setText("Неисправлено");
+        }
+
+        fieldNameEquipment.setText(equipment.getName());
+        fieldTypeEquipment.setText(equipment.getNameType());
+        fieldDescriptionStatus.setText(equipment.getDescriptionProblem());
+
+        Toast.makeText(getApplicationContext(), "Статус ремонта обрудования успешно определен!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorStatusRepair() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка во время определения статуса ремонта оборудования!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void changeFragmentRequest(MenuItem item) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(requestFragment)
+                .commit();
+
+        activeFragment = requestFragment;
+
+        nameFragment.setText("Заявка");
+
+        fieldAddress = findViewById(R.id.field_address);
+        fieldDescription = findViewById(R.id.field_description);
+        fieldDateArrive = findViewById(R.id.field_date_arrive);
+
+        Observable<String> addressField = RxTextView.textChanges(fieldAddress)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> descriptionField = RxTextView.textChanges(fieldDescription)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> dateArriveField = RxTextView.textChanges(fieldDateArrive)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Disposable disposable = validFieldsRequestFragment.combineLatest(addressField, descriptionField, dateArriveField, this::isValidationFieldsRequestFragment)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledSendRequest);
+
+        compositeDisposable.add(disposable);
+    }
+
     private void enabledSendRequest(boolean validFields) {
         if (validFields) {
             buttonSendRequest.setEnabled(true);
@@ -225,7 +419,7 @@ public class MainClientActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidationFields(String addressField, String descriptionField, String dateArriveField) {
+    private boolean isValidationFieldsRequestFragment(String addressField, String descriptionField, String dateArriveField) {
         if (addressField.isEmpty()) {
             fieldAddress.setError("Вы не ввели значение адреса!");
             isValidAddress = false;
@@ -262,17 +456,12 @@ public class MainClientActivity extends AppCompatActivity {
         Disposable disposable = userClientDao.getEmailClientByToken(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::sendRequest, error -> showMessageError());
+                .subscribe(this::sendRequest, throwable -> showMessageErrorRequest());
 
         compositeDisposable.add(disposable);
     }
 
     private void sendRequest(Client client) {
-        String emailClient = client.getEmail();
-        String address = fieldAddress.getText().toString();
-        String description = fieldDescription.getText().toString();
-        String dateArrive = fieldDateArrive.getText().toString();
-
         RequestDao requestDao = dbApi.requestDao();
 
         Date dateNow = new Date();
@@ -280,109 +469,28 @@ public class MainClientActivity extends AppCompatActivity {
 
         String formatDate = dateFormat.format(dateNow);
 
-        Request request = new Request(emailClient, address, description, dateArrive, formatDate);
+        Request request = new Request(
+                client.getEmail(),
+                fieldAddress.getText().toString(),
+                fieldDescription.getText().toString(),
+                fieldDateArrive.getText().toString(), formatDate);
 
         Disposable disposable = requestDao.insert(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
                 .doOnTerminate(loadingDialog::hideLoading)
-                .subscribe(this::showMessageSuccess, throwable -> showMessageError());
+                .subscribe(this::showMessageSuccessRequest, throwable -> showMessageErrorRequest());
 
         compositeDisposable.add(disposable);
     }
 
-    private void showMessageSuccess() {
+    private void showMessageSuccessRequest() {
         Toast.makeText(getApplicationContext(), "Отправка заявки прошла успешно!", Toast.LENGTH_SHORT).show();
     }
 
-    private void showMessageError() {
+    private void showMessageErrorRequest() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки заявки!", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    public void changeFragmentHome(MenuItem item) {
-        drawerLayout.closeDrawer(GravityCompat.START);
-
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(mainClientFragment)
-                .commit();
-
-        activeFragment = mainClientFragment;
-    }
-
-    public void changeFragmentServiceCenters(MenuItem item) {
-        drawerLayout.closeDrawer(GravityCompat.START);
-
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(serviceCentersFragment)
-                .commit();
-
-        activeFragment = serviceCentersFragment;
-    }
-
-    public void changeFragmentStatusRepair(MenuItem item) {
-        drawerLayout.closeDrawer(GravityCompat.START);
-
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(statusRepairFragment)
-                .commit();
-
-        activeFragment = statusRepairFragment;
-    }
-
-    public void changeFragmentRequest(MenuItem item) {
-        drawerLayout.closeDrawer(GravityCompat.START);
-
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(requestFragment)
-                .commit();
-
-        activeFragment = requestFragment;
-
-        fieldAddress = findViewById(R.id.field_address);
-        fieldDescription = findViewById(R.id.field_description);
-        fieldDateArrive = findViewById(R.id.field_date_arrive);
-
-        Observable<String> addressField = RxTextView.textChanges(fieldAddress)
-                .skip(1)
-                .map(CharSequence::toString)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
-
-        Observable<String> descriptionField = RxTextView.textChanges(fieldDescription)
-                .skip(1)
-                .map(CharSequence::toString)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
-
-        Observable<String> dateArriveField = RxTextView.textChanges(fieldDateArrive)
-                .skip(1)
-                .map(CharSequence::toString)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
-
-        Disposable disposable = validFields.combineLatest(addressField, descriptionField, dateArriveField, this::isValidationFields)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::enabledSendRequest);
-
-        compositeDisposable.add(disposable);
     }
 
     public void logout(MenuItem item) {
@@ -459,7 +567,7 @@ public class MainClientActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(getApplicationContext(), "Разрешение отклонено!", Toast.LENGTH_SHORT).show();
             }
-        } else if (requestCode == ACCESS_FINE_LOCATION_PERMISSION) {
+        } else if (requestCode == ACCESS_LOCATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(getApplicationContext(), "Разрешение получено!", Toast.LENGTH_SHORT).show();
             } else {
@@ -470,6 +578,7 @@ public class MainClientActivity extends AppCompatActivity {
 
     public void selectDate(View view) {
         Calendar calendar = Calendar.getInstance();
+
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -539,7 +648,7 @@ public class MainClientActivity extends AppCompatActivity {
         try {
             list = geocoder.getFromLocationName(fieldSearch.getText().toString(), 1);
 
-            Address address = list.get(0);
+            address = list.get(0);
             LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
 
             googleMap.clear();
@@ -567,7 +676,7 @@ public class MainClientActivity extends AppCompatActivity {
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
                         googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
                     } else {
-                        Toast.makeText(getApplicationContext(), "Возникла ошибка при определении местоположения!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Возникла ошибка при определении вашего местоположения!", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -576,9 +685,19 @@ public class MainClientActivity extends AppCompatActivity {
         }
     }
 
+    public void selectLocation(View view) {
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(requestFragment)
+                .commit();
+
+        fieldAddress.setText(address.getAddressLine(0));
+
+        activeFragment = googleMapsFragment;
+    }
+
     public void startAutoCompletePlace(View view) {
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(getApplicationContext());
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields).build(getApplicationContext());
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
     }
 
@@ -597,5 +716,8 @@ public class MainClientActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    public void getListRegServiceByEquipment(View view) {
     }
 }

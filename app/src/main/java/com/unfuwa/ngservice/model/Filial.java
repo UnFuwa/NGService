@@ -2,9 +2,12 @@ package com.unfuwa.ngservice.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
+
+import java.util.List;
 
 @Entity(
         tableName = "Filials",

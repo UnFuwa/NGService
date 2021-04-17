@@ -10,6 +10,7 @@
     app:navigationIcon="@drawable/ic_main_client_menu">
 
     <TextView
+        android:id="@+id/client_name_fragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Главная"
