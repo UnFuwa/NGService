@@ -7,7 +7,9 @@ import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.RegService;
 import com.unfuwa.ngservice.model.Service;
 
-public class RegServiceEquipment {
+import java.util.List;
+
+public class RegServiceExtended {
 
     @Embedded
     private RegService regService;

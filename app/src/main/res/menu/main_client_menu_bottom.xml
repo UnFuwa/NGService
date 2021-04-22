@@ -7,21 +7,25 @@
         <item
             android:id="@+id/home"
             android:icon="@drawable/ic_item_home"
+            android:checked="false"
             android:onClick="changeFragmentHome"/>
 
         <item
             android:id="@+id/list_service"
             android:icon="@drawable/ic_item_list_service"
+            android:checked="false"
             android:onClick="changeFragmentServiceCenters"/>
 
         <item
             android:id="@+id/status_repair"
             android:icon="@drawable/ic_item_status_repair"
+            android:checked="false"
             android:onClick="changeFragmentStatusRepair"/>
 
         <item
             android:id="@+id/request"
             android:icon="@drawable/ic_item_request"
+            android:checked="false"
             android:onClick="changeFragmentRequest"/>
     </group>
 

@@ -7,6 +7,8 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Users",
         foreignKeys = @ForeignKey(
@@ -19,7 +21,7 @@ import androidx.room.PrimaryKey;
                 value = "Token",
                 unique = true)*/
 )
-public class User {
+public class User implements Serializable {
 
     @PrimaryKey
     @NonNull

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:padding="20dp"
+    android:background="@color/DarkGreenCyan">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/image_item"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher"
+            tools:ignore="ContentDescription"
+            android:cropToPadding="true"
+            android:scaleType="centerCrop"
+            android:background="@drawable/border_upload_photo"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name_item"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="start|bottom"
+                android:layout_margin="5dp"
+                android:paddingStart="20dp"
+                android:text="Наименование"
+                android:textStyle="bold"
+                android:textColor="@color/DarkBlack"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/size_item"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="start|top"
+                android:layout_margin="5dp"
+                android:paddingStart="20dp"
+                android:text="Размер"
+                android:textStyle="bold"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="MenuTitle" >
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_item_home"
+            android:checked="false"
+            android:onClick="changeFragmentHome"/>
+
+        <item
+            android:id="@+id/knowledge"
+            android:icon="@drawable/ic_item_knowledge"
+            android:checked="false"
+            android:onClick="changeFragmentKnowledge"/>
+
+        <item
+            android:id="@+id/tasks_work"
+            android:icon="@drawable/ic_item_tasks_work"
+            android:checked="false"
+            android:onClick="changeFragmentTasksWork"/>
+
+        <item
+            android:id="@+id/graph_work"
+            android:icon="@drawable/ic_item_graph_work"
+            android:checked="false"
+            android:onClick="changeFragmentGraphWork"/>
+    </group>
+
+</menu>

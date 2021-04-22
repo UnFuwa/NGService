@@ -9,6 +9,8 @@ import androidx.room.Update;
 
 import com.unfuwa.ngservice.model.User;
 
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 
 @Dao
@@ -21,7 +23,7 @@ public interface UserDao {
     Single<User> getUserByToken(String token);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(User user);
+    Completable insert(User user);
 
     @Update
     void update(User user);

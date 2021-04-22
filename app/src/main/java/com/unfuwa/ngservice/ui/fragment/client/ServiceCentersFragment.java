@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,18 +33,19 @@ import com.unfuwa.ngservice.dao.FilialCityDao;
 import com.unfuwa.ngservice.extendedmodel.FilialCity;
 import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
-import com.unfuwa.ngservice.util.DatabaseApi;
+import com.unfuwa.ngservice.util.database.DatabaseApi;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class ServiceCentersFragment extends Fragment implements OnMapReadyCallback {
+
+    private static final float ZOOM = 15;
 
     private Context context;
     private View view;
@@ -59,7 +59,6 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
     private DatabaseApi dbApi;
     private FilialCityDao filialCityDao;
 
-    private ArrayList<FilialCity> listAllItems;
     private ArrayList<FilialCity> listFilials;
     private ArrayList<Marker> listMarkersNearNearbyFilials;
 
@@ -91,6 +90,7 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
+
         getMyLocation();
 
         loadingDialog = new LoadingDialog(mainClientActivity);
@@ -104,13 +104,8 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
                 .subscribe(this::addServiceCenters, Throwable::printStackTrace);
     }
 
-    public void setListAllItems(ArrayList<FilialCity> listAllItems) {
-        this.listAllItems = listAllItems;
-    }
-
     private void addServiceCenters(List<FilialCity> listAllItems) {
         listFilials = new ArrayList<>(listAllItems);
-        Log.d("CUSTOM", String.valueOf(listFilials));
         listMarkersNearNearbyFilials = new ArrayList<>();
 
         Geocoder geocoder = new Geocoder(context);
@@ -165,7 +160,7 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
                         googleMap.clear();
 
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
                     } else {
                         Toast.makeText(context, "Возникла ошибка при определении вашего местоположения!", Toast.LENGTH_SHORT).show();
                     }

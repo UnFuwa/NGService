@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:padding="20dp"
+    android:background="@drawable/custom_block_list_reg_service">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/custom_block_list_reg_service">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:paddingStart="5dp"
+                android:text="№ Услуги"
+                android:textStyle="bold"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_id_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Идентификатор услуги"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:textColor="@color/DarkBlack"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:paddingStart="5dp"
+
+                android:text="Наименование услуги"
+                android:textStyle="bold"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_name_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Наименование услуги"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:textColor="@color/DarkBlack"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:paddingStart="5dp"
+                android:text="Описание услуги"
+                android:textStyle="bold"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_description_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:lines="6"
+                android:text="Описание услуги"
+                android:gravity="start"
+                android:inputType="none"
+                android:textColor="@color/DarkBlack"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:gravity="end|center_vertical"
+                android:paddingStart="5dp"
+                android:layout_margin="5dp"
+                android:text="Стоимость"
+                android:textStyle="bold"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_price_service"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:paddingStart="5dp"
+                android:lines="9"
+                android:text="Значение"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/home"
+            android:title="Главная"
+            android:icon="@drawable/ic_item_home"
+            android:onClick="changeFragmentHome"/>
+
+        <item
+            android:id="@+id/knowledge"
+            android:title="Справочник"
+            android:icon="@drawable/ic_item_knowledge"
+            android:onClick="changeFragmentKnowledge"/>
+
+        <item
+            android:id="@+id/tasks_work"
+            android:title="Рабочие задачи"
+            android:icon="@drawable/ic_item_tasks_work"
+            android:onClick="changeFragmentTasksWork"/>
+
+        <item
+            android:id="@+id/graph_work"
+            android:title="График работы"
+            android:icon="@drawable/ic_item_graph_work"
+            android:onClick="changeFragmentGraphWork"/>
+
+    </group>
+
+    <item android:title="">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/logout"
+                    android:title="Выход"
+                    android:icon="@drawable/ic_item_logout"
+                    android:onClick="logout"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+</menu>

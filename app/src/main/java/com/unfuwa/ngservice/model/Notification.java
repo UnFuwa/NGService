@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(
         tableName = "Notifications",
         foreignKeys = {
@@ -48,7 +50,7 @@ public class Notification {
 
     @NonNull
     @ColumnInfo(name = "DateCreate")
-    private String dateCreate;
+    private Date dateCreate;
 
     public Notification() { }
 
@@ -97,11 +99,11 @@ public class Notification {
     }
 
     @NonNull
-    public String getDateCreate() {
+    public Date getDateCreate() {
         return dateCreate;
     }
 
-    public void setDateCreate(@NonNull String dateCreate) {
+    public void setDateCreate(@NonNull Date dateCreate) {
         this.dateCreate = dateCreate;
     }
 }

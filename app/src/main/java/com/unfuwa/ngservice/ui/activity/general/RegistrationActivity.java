@@ -2,6 +2,7 @@ package com.unfuwa.ngservice.ui.activity.general;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -15,17 +16,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.UserClientDao;
+import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.model.Client;
 import com.unfuwa.ngservice.model.User;
 import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
 import com.unfuwa.ngservice.ui.dialog.VerifactionEmailDialog;
-import com.unfuwa.ngservice.util.DatabaseApi;
+import com.unfuwa.ngservice.util.database.DatabaseApi;
 import com.unfuwa.ngservice.util.TokenGenerator;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
@@ -46,6 +50,8 @@ public class RegistrationActivity extends AppCompatActivity {
     private MaskImpl maskO;
     private MaskImpl maskTelephone;
 
+    private User userIn;
+
     private TextInputLayout textInputLayoutPassword;
     private TextInputEditText fieldEmail;
     private TextInputEditText fieldPassword;
@@ -58,6 +64,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private final VerifactionEmailDialog verifactionEmailDialog = new VerifactionEmailDialog(RegistrationActivity.this);
     private Button buttonConfirm;
     private boolean isVerificationEmail = false;
+    private Thread threadEmailVerify;
 
     private static final String CACHE_NAME = "token.txt";
     private String CACHE_PATH;
@@ -239,18 +246,18 @@ public class RegistrationActivity extends AppCompatActivity {
         String passwordIn = fieldPassword.getText().toString();
         String fName = fieldF.getText().toString();
         String iName = fieldI.getText().toString();
+        String telephoneIn = fieldTelephone.getText().toString();
         String oName;
 
-        if (fieldO.getText().toString().isEmpty()) {
+        if (fieldO.getText() == null) {
             oName = null;
         } else {
             oName = fieldO.getText().toString();
         }
 
-        String telephoneIn = fieldTelephone.getText().toString();
         genToken = TokenGenerator.generateNewToken();
 
-        User userIn = new User(emailIn, "Client", passwordIn, genToken);
+        userIn = new User(emailIn, "Client", passwordIn, genToken);
         Client clientIn = new Client(emailIn, fName, iName, oName, telephoneIn);
 
         dbApi = DatabaseApi.getInstance(getApplicationContext());
@@ -272,7 +279,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                                 Disposable disposable = Completable.concatArray(completableUser, completableClient)
                                         .doOnSubscribe(disposable1 -> verifactionEmailDialog.showVerification())
-                                        .subscribe(this::startNextActivity, throwable -> showErrorMessage());
+                                        .subscribe(this::verificationEmail, Throwable::printStackTrace);
 
                                 compositeDisposable.add(disposable);
                             } else {
@@ -283,20 +290,43 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     public void verificationEmail(View view) {
+
+    }
+
+    public void verificationEmail() {
+        AtomicBoolean flag = new AtomicBoolean(true);
         firebaseUser = firebaseAuth.getCurrentUser();
         firebaseUser.reload();
 
-        Disposable disposable = Observable.just(firebaseUser.isEmailVerified())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::isVerificationEmail);
+        try {
+            threadEmailVerify = new Thread(()->{
+                while(flag.get()) {
+                    firebaseUser.reload();
 
-        compositeDisposable.add(disposable);
-    }
+                    if (firebaseUser.isEmailVerified()) {
+                        flag.set(false);
+                        isVerificationEmail = true;
+                    } else {
+                        flag.set(true);
+                    }
 
-    private void isVerificationEmail(boolean verificationEmail) {
-        isVerificationEmail = verificationEmail;
-        startNextActivity();
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            threadEmailVerify.start();
+            threadEmailVerify.join();
+
+            if (isVerificationEmail) {
+                startNextActivity();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void startNextActivity() {
@@ -320,9 +350,14 @@ public class RegistrationActivity extends AppCompatActivity {
 
                 writeFile.close();
 
-                Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
-                startActivity(intent);
+                ClientDao clientDao = dbApi.clientDao();
+
+                Disposable disposable = clientDao.getClientByEmail(userIn.getLogin())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
+
+                compositeDisposable.add(disposable);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -332,9 +367,15 @@ public class RegistrationActivity extends AppCompatActivity {
 
     }
 
+    private void startMainClientActivity(ClientUser client) {
+        Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
+        intent.putExtra("client", client);
+        startActivity(intent);
+    }
+
     public void showErrorMessage() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка во время регистрации!", Toast.LENGTH_SHORT).show();
-        verifactionEmailDialog.hideVerification();
     }
 
     public void startAuthorizationActivity(View view) {

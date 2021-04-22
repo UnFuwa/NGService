@@ -10,6 +10,7 @@ import androidx.room.Update;
 import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.model.Client;
 
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 
 @Dao
@@ -19,7 +20,7 @@ public interface ClientDao {
     Single<ClientUser> getClientByEmail(String email);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Client client);
+    Completable insert(Client client);
 
     @Update
     void update(Client client);

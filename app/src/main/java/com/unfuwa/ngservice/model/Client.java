@@ -8,6 +8,8 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Clients",
         foreignKeys = @ForeignKey(
@@ -17,7 +19,7 @@ import androidx.room.PrimaryKey;
                 onDelete = ForeignKey.RESTRICT,
                 onUpdate = ForeignKey.RESTRICT)
 )
-public class Client {
+public class Client implements Serializable {
 
     @PrimaryKey
     @NonNull

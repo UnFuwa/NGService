@@ -22,12 +22,12 @@ public class MainClientFragment extends Fragment {
     private TextView URLInstagramCompany;
     private TextView URLWhatsAppCompany;
 
-    private static final String ADDRESS_MAIN_CENTER = "";
-    private static final String TELEPHONE = "+7 (800) 555-35-35";
-    private static final String EMAIL = "";
-    private static final String URL_VK = "";
-    private static final String URL_INSTAGRAM = "";
-    private static final String URL_WHATS_APP = "";
+    private static final String ADDRESS_MAIN_CENTER = "/*ЗАГЛУШКА*/";
+    private static final String TELEPHONE = "/*ЗАГЛУШКА*/";
+    private static final String EMAIL = "/*ЗАГЛУШКА*/";
+    private static final String URL_VK = "/*ЗАГЛУШКА*/";
+    private static final String URL_INSTAGRAM = "/*ЗАГЛУШКА*/";
+    private static final String URL_WHATS_APP = "/*ЗАГЛУШКА*/";
 
     private void initComponents() {
         addressMainCenterCompany = view.findViewById(R.id.address_main_center_company);

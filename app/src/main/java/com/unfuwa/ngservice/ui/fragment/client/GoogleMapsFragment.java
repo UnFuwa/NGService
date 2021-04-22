@@ -53,6 +53,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
 
+    private static final float ZOOM = 15;
+
     private Context context;
     private View view;
     private GoogleMap googleMap;
@@ -104,7 +106,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
                         Location currentLocation = (Location) task.getResult();
                         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
                     } else {
                         Toast.makeText(context, "Возникла ошибка при определении местоположения!", Toast.LENGTH_SHORT).show();
                     }

@@ -7,6 +7,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Specialists",
         foreignKeys = {
@@ -24,7 +26,7 @@ import androidx.room.PrimaryKey;
                     onUpdate = ForeignKey.RESTRICT)
         }
 )
-public class Specialist {
+public class Specialist implements Serializable {
 
     @PrimaryKey
     @NonNull

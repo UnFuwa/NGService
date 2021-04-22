@@ -17,12 +17,11 @@ import com.unfuwa.ngservice.dao.SpecialistDao;
 import com.unfuwa.ngservice.dao.UserDao;
 import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
-import com.unfuwa.ngservice.model.Client;
-import com.unfuwa.ngservice.model.Specialist;
 import com.unfuwa.ngservice.model.User;
 import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
+import com.unfuwa.ngservice.ui.activity.specialist.MainSpecialistActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
-import com.unfuwa.ngservice.util.DatabaseApi;
+import com.unfuwa.ngservice.util.database.DatabaseApi;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -208,15 +207,13 @@ public class AuthorizationActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainClientActivity.class);
         intent.putExtra("client", client);
         startActivity(intent);
-        finish();
     }
 
     private void startMainSpecialistActivity(SpecialistUser specialist) {
         Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();
-        //Intent intent = new Intent(this, MainSpecialistActivity.class);
-        //intent.putExtra("specialist", specialist);
-        //startActivity(intent);
-        finish();
+        Intent intent = new Intent(this, MainSpecialistActivity.class);
+        intent.putExtra("specialist", specialist);
+        startActivity(intent);
     }
 
     public void showErrorMessage() {
@@ -226,6 +223,5 @@ public class AuthorizationActivity extends AppCompatActivity {
     public void startRegistrationActivity(View view) {
         Intent intent = new Intent(this, RegistrationActivity.class);
         startActivity(intent);
-        finish();
     }
 }

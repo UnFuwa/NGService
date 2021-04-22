@@ -32,7 +32,7 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar"/>
+            layout="@layout/toolbar_client"/>
 
         <FrameLayout
             android:id="@+id/fragment_container"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="DarkLightGray">#3E3E3E</color>
     <color name="DarkGreenCyan">#2d8173</color>
     <color name="LightGreenCyan">#40817a</color>
     <color name="DarkCyan">#002C24</color>
@@ -8,4 +9,5 @@
     <color name="White">#ffffff</color>
     <color name="LightGray">#ACACAC</color>
     <color name="DarkGray">#7A7A7A</color>
+    <color name="Red">#BA2828</color>
 </resources>

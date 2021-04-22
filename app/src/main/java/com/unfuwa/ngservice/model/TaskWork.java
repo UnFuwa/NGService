@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(
         tableName = "TasksWork",
         foreignKeys = @ForeignKey(
@@ -40,11 +42,11 @@ public class TaskWork {
 
     @NonNull
     @ColumnInfo(name = "DateFrom")
-    private String dateFrom;
+    private Date dateFrom;
 
     @NonNull
     @ColumnInfo(name = "DateTo")
-    private String dateTo;
+    private Date dateTo;
 
     @NonNull
     @ColumnInfo(name = "Difficult")
@@ -56,12 +58,11 @@ public class TaskWork {
 
     public TaskWork() { }
 
-    @NonNull
     public int getId() {
         return id;
     }
 
-    public void setId(@NonNull int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -102,20 +103,20 @@ public class TaskWork {
     }
 
     @NonNull
-    public String getDateFrom() {
+    public Date getDateFrom() {
         return dateFrom;
     }
 
-    public void setDateFrom(@NonNull String dateFrom) {
+    public void setDateFrom(@NonNull Date dateFrom) {
         this.dateFrom = dateFrom;
     }
 
     @NonNull
-    public String getDateTo() {
+    public Date getDateTo() {
         return dateTo;
     }
 
-    public void setDateTo(@NonNull String dateTo) {
+    public void setDateTo(@NonNull Date dateTo) {
         this.dateTo = dateTo;
     }
 
