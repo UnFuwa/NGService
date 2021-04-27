@@ -4,9 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="20dp"
-    tools:context=".ui.fragment.client.MainClientFragment">
+    tools:context=".ui.fragment.specialist.TasksWorkFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,228 +13,64 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/label_tasks_work_from"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"
             android:layout_marginBottom="10dp"
-            android:text="Контактные данные"
+            android:text="Список рабочих задач от"
             android:textStyle="bold"
             android:textColor="@color/DarkGreenCyan"
             android:textAllCaps="false"
-            android:textSize="20sp"/>
+            android:textSize="18sp"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="165dp"
-            android:orientation="vertical"
-            android:background="@drawable/custom_block_fragment">
-
-            <TextView
-                android:id="@+id/address_main_center_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="2dp"
-                android:text="Адрес гл. центра:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/telephone_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="Телефон тех. поддержки:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/email_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="Электронная почта:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/url_vk_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="VK:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/url_instagram_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="Instagram:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/url_whats_app_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:text="WhatsApp:"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-        </LinearLayout>
-
-        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="10dp"
-            android:text="Кратко об компании"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="345dp"
+            android:layout_marginBottom="30dp"
             android:orientation="vertical"
             android:background="@drawable/custom_block_fragment">
 
-            <TextView
+            <ListView
+                android:id="@+id/list_tasks_work"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="2dp"
-                android:text="@string/short_info_company_1"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
+                android:layout_height="420dp"
+                android:background="@drawable/custom_block_fragment">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="@string/short_info_company_2"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="2dp"
-                android:text="@string/short_info_company_3"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:text="@string/short_info_company_3_1"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:text="@string/short_info_company_3_2"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:text="@string/short_info_company_3_3"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:text="@string/short_info_company_3_4"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginBottom="10dp"
-                android:text="@string/short_info_company_3_5"
-                android:textColor="@color/DarkGreenCyan"
-                android:textAllCaps="false"
-                android:textSize="14sp"/>
+            </ListView>
 
             <Button
-                android:id="@+id/button_call_operator"
-                android:onClick="callOperator"
+                android:id="@+id/button_set_status_complete_task_work"
+                android:onClick="setStatusCompleteTasksWork"
                 android:layout_width="170dp"
                 android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:layout_marginRight="18dp"
                 android:background="@drawable/signin_button"
                 android:fontFamily="@font/aqum"
-                android:text="Вызвать мастера"
+                android:text="Завершить задачи"
                 android:layout_gravity="right"
                 android:textAllCaps="false"
                 android:textColor="#174A42"
                 android:textSize="12sp"/>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/total_tasks_work"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingStart="10dp"
+            android:padding="5dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/custom_block_fragment"
+            android:text="ОБЩЕЕ КОЛИЧЕСТВО:"
+            android:textStyle="bold|italic"
+            android:textColor="@color/LightBlack"
+            android:textAllCaps="false"
+            android:textSize="18sp"/>
 
     </LinearLayout>
 

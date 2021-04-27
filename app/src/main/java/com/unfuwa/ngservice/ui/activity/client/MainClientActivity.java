@@ -556,17 +556,6 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         return isValidAddress && isValidDescription && isValidDateArrive;
     }
 
-    /*public void startSendRequest(View view) {
-        UserClientDao userClientDao = dbApi.userClientDao();
-
-        Disposable disposable = userClientDao.getEmailClientByToken(token)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::sendRequest, throwable -> showMessageErrorRequest());
-
-        compositeDisposable.add(disposable);
-    }*/
-
     public void sendRequest(View view) {
         RequestDao requestDao = dbApi.requestDao();
 
@@ -904,7 +893,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     private void addRegService(List<RegServiceExtended> regServicesExtended) {
-        List<Double> listPrices = new ArrayList<>();
+        ArrayList<Double> listPrices = new ArrayList<>();
 
         //AtomicReference<Double> sumPrice = new AtomicReference<>(0.0);
         listServices = new ArrayList<>(regServicesExtended);
@@ -943,6 +932,6 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     private void showMessageErrorRegService() {
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оказанных услуг!", Toast.LENGTH_SHORT).show();
     }
 }

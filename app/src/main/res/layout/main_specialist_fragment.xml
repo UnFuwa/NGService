@@ -62,7 +62,7 @@
 
             <Button
                 android:id="@+id/button_tasks_more_details"
-                android:onClick=""
+                android:onClick="getTaskDetails"
                 android:layout_width="170dp"
                 android:layout_height="40dp"
                 android:layout_marginRight="18dp"

@@ -42,11 +42,11 @@ public class TaskWork {
 
     @NonNull
     @ColumnInfo(name = "DateFrom")
-    private Date dateFrom;
+    private String dateFrom;
 
     @NonNull
     @ColumnInfo(name = "DateTo")
-    private Date dateTo;
+    private String dateTo;
 
     @NonNull
     @ColumnInfo(name = "Difficult")
@@ -103,20 +103,20 @@ public class TaskWork {
     }
 
     @NonNull
-    public Date getDateFrom() {
+    public String getDateFrom() {
         return dateFrom;
     }
 
-    public void setDateFrom(@NonNull Date dateFrom) {
+    public void setDateFrom(@NonNull String dateFrom) {
         this.dateFrom = dateFrom;
     }
 
     @NonNull
-    public Date getDateTo() {
+    public String getDateTo() {
         return dateTo;
     }
 
-    public void setDateTo(@NonNull Date dateTo) {
+    public void setDateTo(@NonNull String dateTo) {
         this.dateTo = dateTo;
     }
 

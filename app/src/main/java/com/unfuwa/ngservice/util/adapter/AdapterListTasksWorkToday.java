@@ -11,20 +11,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
 import com.unfuwa.ngservice.model.TaskWork;
 
 import java.util.ArrayList;
 
-public class AdapterListTasksWorkToday extends ArrayAdapter<TaskWork> {
+public class AdapterListTasksWorkToday extends ArrayAdapter<GraphTaskWork> {
 
     private TextView titleTaskWorkToday;
     private TextView shortDescriptionTaskWorkToday;
 
     private Context context;
     private int resource;
-    private ArrayList<TaskWork> listTasksWorkToday;
+    private ArrayList<GraphTaskWork> listTasksWorkToday;
 
-    public AdapterListTasksWorkToday(@NonNull Context context, int resource, ArrayList<TaskWork> listTasksWorkToday) {
+    public AdapterListTasksWorkToday(@NonNull Context context, int resource, ArrayList<GraphTaskWork> listTasksWorkToday) {
         super(context, R.layout.list_tasks_work_today, listTasksWorkToday);
         this.context = context;
         this.resource = resource;
@@ -40,8 +41,8 @@ public class AdapterListTasksWorkToday extends ArrayAdapter<TaskWork> {
         titleTaskWorkToday = convertView.findViewById(R.id.title_task_work_today);
         shortDescriptionTaskWorkToday = convertView.findViewById(R.id.short_description_task_work_today);
 
-        titleTaskWorkToday.setText(getItem(position).getTitle());
-        shortDescriptionTaskWorkToday.setText(getItem(position).getShortDescription());
+        titleTaskWorkToday.setText(getItem(position).getTaskWork().getTitle());
+        shortDescriptionTaskWorkToday.setText(getItem(position).getTaskWork().getShortDescription());
 
         return convertView;
     }

@@ -7,12 +7,17 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(
+        primaryKeys = {
+                "Id",
+                "LoginSpecialist",
+                "IdTaskWork"},
         tableName = "GraphsWork",
         indices = {
                 @Index(value = "LoginSpecialist"),
-                @Index(value = "IdTaskWork")
-        },
+                @Index(value = "IdTaskWork")},
         foreignKeys = {
                 @ForeignKey(
                         entity = Specialist.class,
@@ -25,12 +30,10 @@ import androidx.room.PrimaryKey;
                         parentColumns = "Id",
                         childColumns = "IdTaskWork",
                         onDelete = ForeignKey.RESTRICT,
-                        onUpdate = ForeignKey.RESTRICT)
-        }
+                        onUpdate = ForeignKey.RESTRICT)}
 )
 public class GraphWork {
 
-    @PrimaryKey(autoGenerate = true)
     @NonNull
     @ColumnInfo(name = "Id")
     private int id;
@@ -45,7 +48,7 @@ public class GraphWork {
 
     @NonNull
     @ColumnInfo(name = "Date")
-    private String date;
+    private Date date;
 
     @NonNull
     @ColumnInfo(name = "FlagDay")
@@ -53,12 +56,11 @@ public class GraphWork {
 
     public GraphWork() { }
 
-    @NonNull
     public int getId() {
         return id;
     }
 
-    public void setId(@NonNull int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -71,21 +73,20 @@ public class GraphWork {
         this.loginSpecialist = loginSpecialist;
     }
 
-    @NonNull
     public int getIdTaskWork() {
         return idTaskWork;
     }
 
-    public void setIdTaskWork(@NonNull int idTaskWork) {
+    public void setIdTaskWork(int idTaskWork) {
         this.idTaskWork = idTaskWork;
     }
 
     @NonNull
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(@NonNull String date) {
+    public void setDate(@NonNull Date date) {
         this.date = date;
     }
 

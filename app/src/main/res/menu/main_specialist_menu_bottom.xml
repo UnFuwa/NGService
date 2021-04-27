@@ -27,6 +27,12 @@
             android:icon="@drawable/ic_item_graph_work"
             android:checked="false"
             android:onClick="changeFragmentGraphWork"/>
+
+        <item
+            android:id="@+id/service_equipment"
+            android:icon="@drawable/ic_service_equipment"
+            android:checked="false"
+            android:onClick="changeFragmentServiceEquipment"/>
     </group>
 
 </menu>

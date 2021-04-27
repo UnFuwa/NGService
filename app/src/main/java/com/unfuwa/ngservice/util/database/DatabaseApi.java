@@ -2,18 +2,23 @@ package com.unfuwa.ngservice.util.database;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.FilialCityDao;
+import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.RequestDao;
 import com.unfuwa.ngservice.dao.SpecialistDao;
+import com.unfuwa.ngservice.dao.TaskWorkDao;
 import com.unfuwa.ngservice.dao.UserClientDao;
 import com.unfuwa.ngservice.dao.UserDao;
 import com.unfuwa.ngservice.model.AccessRight;
@@ -60,7 +65,7 @@ import com.unfuwa.ngservice.model.User;
         TypeNotification.class,
 
     },
-        version = 4,
+        version = 7,
         exportSchema = false
 )
 @TypeConverters({DateConverter.class})
@@ -75,6 +80,8 @@ public abstract class DatabaseApi extends RoomDatabase {
     public abstract ClientDao clientDao();
     public abstract SpecialistDao specialistDao();
     public abstract NotificationDao notificationDao();
+    public abstract GraphWorkDao graphWorkDao();
+    public abstract TaskWorkDao taskWorkDao();
 
     private static DatabaseApi INSTANCE;
 

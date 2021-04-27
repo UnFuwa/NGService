@@ -27,6 +27,12 @@
             android:icon="@drawable/ic_item_graph_work"
             android:onClick="changeFragmentGraphWork"/>
 
+        <item
+            android:id="@+id/service_equipment"
+            android:title="Сервисное обслуживание"
+            android:icon="@drawable/ic_service_equipment"
+            android:onClick="changeFragmentServiceEquipment"/>
+
     </group>
 
     <item android:title="">
