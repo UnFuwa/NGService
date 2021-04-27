@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    tools:context=".ui.fragment.specialist.AddEquipmentFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="start"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_marginBottom="10dp"
+            android:text="Параметры оборудования"
+            android:textStyle="bold"
+            android:textColor="@color/DarkGreenCyan"
+            android:textAllCaps="false"
+            android:textSize="20sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="560dp"
+            android:padding="10dp"
+            android:orientation="vertical"
+            android:background="@drawable/custom_block_fragment">
+
+            <EditText
+                android:id="@+id/field_email_client"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Эл. почта клиента"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_login"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/input_field"
+                android:layout_marginBottom="20dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/field_type_equipment"
+                    android:layout_width="260dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Тип оборудования"
+                    android:ems="10"
+                    android:textColorHint="#B5B5B5"
+                    android:inputType="text"
+                    android:background="@drawable/input_field_not_focus"
+                    android:textColor="@color/White"
+                    android:textAllCaps="false"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textSize="14sp"
+                    android:drawablePadding="13dp"
+                    android:drawableStart="@drawable/ic_type_equipment"
+                    android:autofillHints=""/>
+
+                <ImageView
+                    android:id="@+id/ic_down_list"
+                    android:src="@drawable/ic_down_list"
+                    android:layout_toRightOf="@+id/field_type_equipment"
+                    android:layout_centerVertical="true"
+                    android:onClick=""
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="centerCrop"/>
+
+            </RelativeLayout>
+
+            <EditText
+                android:id="@+id/field_name_equipment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Наименование"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="text"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_name_equipment"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <EditText
+                android:id="@+id/field_characters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Технические характеристики (через запятую)"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="textMultiLine"
+                android:minLines="5"
+                android:maxLines="7"
+                android:scrollbars="vertical"
+                android:gravity="top|left"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_description"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <EditText
+                android:id="@+id/field_description_problem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Описание проблемы"
+                android:ems="10"
+                android:textColorHint="#B5B5B5"
+                android:inputType="textMultiLine"
+                android:minLines="7"
+                android:maxLines="7"
+                android:scrollbars="vertical"
+                android:gravity="top|left"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textAllCaps="false"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="14sp"
+                android:drawablePadding="13dp"
+                android:drawableStart="@drawable/ic_description"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="" />
+
+            <Button
+                android:id="@+id/button_add_equipment"
+                android:onClick="addEquipment"
+                android:layout_width="170dp"
+                android:layout_height="40dp"
+                android:background="@drawable/signin_button"
+                android:fontFamily="@font/aqum"
+                android:text="Добавить"
+                android:layout_gravity="right"
+                android:textAllCaps="false"
+                android:textColor="#174A42"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -17,8 +17,10 @@ import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.RequestDao;
+import com.unfuwa.ngservice.dao.ServiceDao;
 import com.unfuwa.ngservice.dao.SpecialistDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
+import com.unfuwa.ngservice.dao.TypeEquipmentDao;
 import com.unfuwa.ngservice.dao.UserClientDao;
 import com.unfuwa.ngservice.dao.UserDao;
 import com.unfuwa.ngservice.model.AccessRight;
@@ -82,6 +84,8 @@ public abstract class DatabaseApi extends RoomDatabase {
     public abstract NotificationDao notificationDao();
     public abstract GraphWorkDao graphWorkDao();
     public abstract TaskWorkDao taskWorkDao();
+    public abstract ServiceDao serviceDao();
+    public abstract TypeEquipmentDao typeEquipmentDao();
 
     private static DatabaseApi INSTANCE;
 

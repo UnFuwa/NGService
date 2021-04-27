@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:padding="20dp"
+    android:background="@drawable/custom_block_fragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/custom_block_fragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:paddingStart="5dp"
+                android:text="№ Оборудования"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_id_equipment_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Идентификатор оборудования"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:textColor="@color/DarkBlack"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:paddingStart="5dp"
+                android:text="Наименование оборудования"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_name_equipment_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Наименование оборудования"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:textColor="@color/DarkBlack"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="110dp"
+                android:layout_height="20dp"
+                android:gravity="start|center_vertical"
+                android:layout_margin="5dp"
+                android:text="Эл. почта клиента"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_email_client_list"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:paddingStart="5dp"
+                android:text="Значение"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="20dp"
+                android:gravity="start|center_vertical"
+                android:layout_margin="5dp"
+                android:text="ФИО клиента"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="12sp"/>
+
+            <EditText
+                android:id="@+id/field_fio_client_list"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:paddingStart="5dp"
+                android:text="Значение"
+                android:gravity="start|center_vertical"
+                android:inputType="none"
+                android:background="@drawable/input_field"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:autofillHints=""/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

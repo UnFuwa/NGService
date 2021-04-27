@@ -7,6 +7,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,7 +23,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,21 +34,27 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
+import com.unfuwa.ngservice.extendedmodel.EquipmentClient;
 import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
 import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
 import com.unfuwa.ngservice.model.Notification;
 import com.unfuwa.ngservice.model.TaskWork;
+import com.unfuwa.ngservice.model.TypeEquipment;
 import com.unfuwa.ngservice.ui.activity.general.AuthorizationActivity;
+import com.unfuwa.ngservice.ui.fragment.specialist.AddEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.ServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TaskWorkDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
+import com.unfuwa.ngservice.util.adapter.AdapterListEquipment;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWork;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWorkToday;
 import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
@@ -58,6 +68,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -98,6 +109,28 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private ListView listViewTasksWork;
     private AdapterListTasksWork adapterListTasksWork;
 
+    private ArrayList<EquipmentClient> listEquipments;
+    private AdapterListEquipment adapterListEquipment;
+    private ListView listViewEquipments;
+    private TextView totalEquipments;
+
+    private ArrayList<TypeEquipment> listTypesEquipment;
+    private EditText fieldEmailClient;
+    private AutoCompleteTextView fieldTypeEquipment;
+    private ImageView iconDownListTypesEquipment;
+    private EditText fieldNameEquipment;
+    private EditText fieldCharactersEquipment;
+    private EditText fieldDescriptionProblem;
+    private Button buttonAddEquipment;
+
+    private Observable<Boolean> validFieldsAddEquipment;
+
+    private boolean isValidEmailClient;
+    private boolean isValidTypeEquipment;
+    private boolean isValidNameEquipment;
+    private boolean isValidCharactersEquipment;
+    private boolean isValidDescriptionProblem;
+
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private BottomNavigationView navigationViewBottom;
@@ -114,6 +147,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private TaskWorkDetailFragment taskWorkDetailFragment;
     private GraphWorkFragment graphWorkFragment;
     private ServiceEquipmentFragment serviceEquipmentFragment;
+    private AddEquipmentFragment addEquipmentFragment;
 
     private void initComponents() {
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -162,6 +196,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         taskWorkDetailFragment = new TaskWorkDetailFragment();
         graphWorkFragment = new GraphWorkFragment();
         serviceEquipmentFragment = new ServiceEquipmentFragment();
+        addEquipmentFragment = new AddEquipmentFragment();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -179,12 +214,14 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, taskWorkDetailFragment, "TaskWorkDetail")
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
                 .add(R.id.fragment_container, serviceEquipmentFragment, "ServiceEquipment")
+                .add(R.id.fragment_container, addEquipmentFragment, "AddEquipment")
                 .show(mainSpecialistFragment)
                 .hide(knowledgeFragment)
                 .hide(tasksWorkFragment)
                 .hide(taskWorkDetailFragment)
                 .hide(graphWorkFragment)
                 .hide(serviceEquipmentFragment)
+                .hide(addEquipmentFragment)
                 .commit();
 
         activeFragment = mainSpecialistFragment;
@@ -311,6 +348,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         activeFragment = mainSpecialistFragment;
 
         nameFragment.setText("Главная");
+        nameFragment.setTextSize(18);
 
         selectTaskWorkToday = -1;
         taskWork = null;
@@ -371,6 +409,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         activeFragment = taskWorkDetailFragment;
 
         nameFragment.setText("Подробнее об задаче");
+        nameFragment.setTextSize(18);
 
         idTaskWork = findViewById(R.id.id_task_work);
         titleTaskWork = findViewById(R.id.field_title_task_work);
@@ -444,6 +483,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         activeFragment = tasksWorkFragment;
 
         nameFragment.setText("Рабочие задачи");
+        nameFragment.setTextSize(18);
 
         TaskWorkDao taskWorkDao = dbApi.taskWorkDao();
 
@@ -540,9 +580,12 @@ public class MainSpecialistActivity extends AppCompatActivity {
         activeFragment = graphWorkFragment;
 
         nameFragment.setText("График работы");
+        nameFragment.setTextSize(18);
     }
 
     public void changeFragmentServiceEquipment(MenuItem item) {
+        EquipmentDao equipmentDao = dbApi.equipmentDao();
+
         if (!item.isChecked()) {
             item.setChecked(true);
         } else {
@@ -559,5 +602,122 @@ public class MainSpecialistActivity extends AppCompatActivity {
         activeFragment = serviceEquipmentFragment;
 
         nameFragment.setText("Сервисное обслуживание");
+        nameFragment.setTextSize(15);
+
+        listViewEquipments = findViewById(R.id.list_service_equipment);
+        totalEquipments = findViewById(R.id.total_equipments);
+
+        Disposable disposable = equipmentDao.getListEquipment()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::createListEquipments, throwable -> showMessageErrorListEquipments());
+
+        compositeDisposable.add(disposable);
     }
+
+    @SuppressLint("SetTextI18n")
+    private void createListEquipments(List<EquipmentClient> list) {
+        listEquipments = new ArrayList<>(list);
+
+        totalEquipments.setText("ОБЩЕЕ КОЛИЧЕСТВО: " + listEquipments.size());
+
+        adapterListEquipment = new AdapterListEquipment(getApplicationContext(), R.layout.list_equipment, listEquipments);
+        listViewEquipments.setAdapter(adapterListEquipment);
+        listViewEquipments.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
+
+        Toast.makeText(getApplicationContext(), "Успешно сформирован список оборудования на учете!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorListEquipments() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оборудования на учете!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void putEquipmentOnRecord(View view) {
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(addEquipmentFragment)
+                .commit();
+
+        activeFragment = addEquipmentFragment;
+
+        nameFragment.setText("Поставка на учет");
+        nameFragment.setTextSize(18);
+
+        fieldEmailClient = findViewById(R.id.field_email_client);
+        fieldTypeEquipment = findViewById(R.id.field_type_equipment);
+        iconDownListTypesEquipment = findViewById(R.id.ic_down_list);
+        fieldNameEquipment = findViewById(R.id.field_name_equipment);
+        fieldCharactersEquipment = findViewById(R.id.field_characters);
+        fieldDescriptionProblem = findViewById(R.id.field_description_problem);
+        buttonAddEquipment = findViewById(R.id.button_add_equipment);
+
+        Observable<String> emailClientField = RxTextView.textChanges(fieldEmailClient)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> typeEquipmentField = RxTextView.textChanges(fieldTypeEquipment)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> nameEquipmentField = RxTextView.textChanges(fieldNameEquipment)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> charactersEquipmentField = RxTextView.textChanges(fieldCharactersEquipment)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> descriptionProblemField = RxTextView.textChanges(fieldDescriptionProblem)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Disposable disposable = validFieldsAddEquipment.combineLatest(emailClientField, typeEquipmentField, nameEquipmentField, charactersEquipmentField, descriptionProblemField, this::isValidationFieldsAddEquipment)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledAddEquipment);
+
+        compositeDisposable.add(disposable);
+    }
+
+    private void enabledAddEquipment(boolean validFields) {
+        if (validFields) {
+            buttonAddEquipment.setEnabled(true);
+        } else {
+            buttonAddEquipment.setEnabled(false);
+        }
+    }
+
+    private boolean isValidationFieldsAddEquipment(String emailClientField, String typeEquipmentField, String nameEquipmentField, String charactersEquipmentField, String descriptionProblemField) {
+        if (idEquipmentField.isEmpty()) {
+            fieldIdEquipment.setError("Вы не ввели значение идентификатора оборудования!");
+            isValidIdEquipment = false;
+        } else {
+            isValidIdEquipment = true;
+        }
+
+        return isValidIdEquipment;
+    }
+
 }
