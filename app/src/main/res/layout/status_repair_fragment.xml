@@ -56,7 +56,7 @@
                 android:id="@+id/field_id_equipment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Идентификатор оборудования"
+                android:hint="Идентификатор оборудования*"
                 android:ems="10"
                 android:textColorHint="#B5B5B5"
                 android:inputType="number"

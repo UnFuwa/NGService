@@ -36,18 +36,26 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
+import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
+import com.unfuwa.ngservice.dao.TypeEquipmentDao;
+import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.extendedmodel.EquipmentClient;
 import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
+import com.unfuwa.ngservice.extendedmodel.RegServiceExtended;
 import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
+import com.unfuwa.ngservice.model.Client;
+import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.Notification;
+import com.unfuwa.ngservice.model.Service;
 import com.unfuwa.ngservice.model.TaskWork;
 import com.unfuwa.ngservice.model.TypeEquipment;
 import com.unfuwa.ngservice.ui.activity.general.AuthorizationActivity;
 import com.unfuwa.ngservice.ui.fragment.specialist.AddEquipmentFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.EquipmentDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
@@ -55,6 +63,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.ServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TaskWorkDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
 import com.unfuwa.ngservice.util.adapter.AdapterListEquipment;
+import com.unfuwa.ngservice.util.adapter.AdapterListRegService;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWork;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWorkToday;
 import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
@@ -101,7 +110,6 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private EditText fullDescriptionTaskWork;
 
     private TaskWork taskWork;
-
     private ArrayList<TaskWork> listTasksWork;
     private ArrayList<TaskWork> listTasksWorkSeleсted;
     private TextView labelTasksWorkFrom;
@@ -114,7 +122,20 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private ListView listViewEquipments;
     private TextView totalEquipments;
 
-    private ArrayList<TypeEquipment> listTypesEquipment;
+    private TextView idEquipmentDetail;
+    private EditText fieldEmailClientDetail;
+    private EditText fieldTypeEquipmentDetail;
+    private EditText fieldNameEquipmentDetail;
+    private EditText fieldCharactersEquipmentDetail;
+    private EditText fieldDescriptionProblemDetail;
+    private EquipmentClient equipmentClient;
+
+    private ArrayList<Service> listServices;
+    private ArrayList<RegServiceExtended> listRegServices;
+    private AdapterListRegService adapterListRegServices;
+    private ListView listViewRegService;
+
+    private ArrayList<String> listTypesEquipment;
     private EditText fieldEmailClient;
     private AutoCompleteTextView fieldTypeEquipment;
     private ImageView iconDownListTypesEquipment;
@@ -125,6 +146,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private Observable<Boolean> validFieldsAddEquipment;
 
+    private Integer isExistEmailClient;
     private boolean isValidEmailClient;
     private boolean isValidTypeEquipment;
     private boolean isValidNameEquipment;
@@ -147,6 +169,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private TaskWorkDetailFragment taskWorkDetailFragment;
     private GraphWorkFragment graphWorkFragment;
     private ServiceEquipmentFragment serviceEquipmentFragment;
+    private EquipmentDetailFragment equipmentDetailFragment;
     private AddEquipmentFragment addEquipmentFragment;
 
     private void initComponents() {
@@ -196,6 +219,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         taskWorkDetailFragment = new TaskWorkDetailFragment();
         graphWorkFragment = new GraphWorkFragment();
         serviceEquipmentFragment = new ServiceEquipmentFragment();
+        equipmentDetailFragment = new EquipmentDetailFragment();
         addEquipmentFragment = new AddEquipmentFragment();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -214,6 +238,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, taskWorkDetailFragment, "TaskWorkDetail")
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
                 .add(R.id.fragment_container, serviceEquipmentFragment, "ServiceEquipment")
+                .add(R.id.fragment_container, equipmentDetailFragment, "EquipmentDetail")
                 .add(R.id.fragment_container, addEquipmentFragment, "AddEquipment")
                 .show(mainSpecialistFragment)
                 .hide(knowledgeFragment)
@@ -221,6 +246,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .hide(taskWorkDetailFragment)
                 .hide(graphWorkFragment)
                 .hide(serviceEquipmentFragment)
+                .hide(equipmentDetailFragment)
                 .hide(addEquipmentFragment)
                 .commit();
 
@@ -272,7 +298,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                     listNotifications = new ArrayList<>(notificationDao.getLastNotifications(specialist.getSpecialist().getLogin()));
                     runOnUiThread(this::updateNotifications);
 
-                    Thread.sleep(10000);
+                    Thread.sleep(20000);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
@@ -601,8 +627,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         activeFragment = serviceEquipmentFragment;
 
-        nameFragment.setText("Сервисное обслуживание");
-        nameFragment.setTextSize(15);
+        nameFragment.setText("Сервис");
+        nameFragment.setTextSize(18);
 
         listViewEquipments = findViewById(R.id.list_service_equipment);
         totalEquipments = findViewById(R.id.total_equipments);
@@ -626,11 +652,64 @@ public class MainSpecialistActivity extends AppCompatActivity {
         listViewEquipments.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                drawerLayout.closeDrawer(GravityCompat.START);
 
+                fragmentManager.beginTransaction()
+                        .hide(activeFragment)
+                        .show(equipmentDetailFragment)
+                        .commit();
+
+                activeFragment = equipmentDetailFragment;
+
+                nameFragment.setText("Подробнее об оборудовании");
+                nameFragment.setTextSize(15);
+
+                idEquipmentDetail = findViewById(R.id.id_equipment_detail);
+                fieldEmailClientDetail = findViewById(R.id.field_email_client_detail);
+                fieldTypeEquipmentDetail = findViewById(R.id.field_type_equipment_detail);
+                fieldNameEquipmentDetail = findViewById(R.id.field_name_equipment_detail);
+                fieldCharactersEquipmentDetail = findViewById(R.id.field_characters_detail);
+                fieldDescriptionProblemDetail = findViewById(R.id.field_description_problem_detail);
+
+                equipmentClient = adapterListEquipment.getItem(position);
+
+                idEquipmentDetail.setText(Integer.toString(equipmentClient.getEquipment().getId()));
+                fieldEmailClientDetail.setText(equipmentClient.getClient().getEmail());
+                fieldTypeEquipmentDetail.setText(equipmentClient.getEquipment().getNameType());
+                fieldNameEquipmentDetail.setText(equipmentClient.getEquipment().getName());
+                fieldCharactersEquipmentDetail.setText(equipmentClient.getEquipment().getCharacters());
+                fieldDescriptionProblemDetail.setText(equipmentClient.getEquipment().getDescriptionProblem());
             }
         });
 
         Toast.makeText(getApplicationContext(), "Успешно сформирован список оборудования на учете!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void setStatusRepairCompleteEquipment(View view) {
+        EquipmentDao equipmentDao = dbApi.equipmentDao();
+
+        equipmentClient.getEquipment().setStatusRepair(true);
+
+        Disposable disposable = equipmentDao.update(equipmentClient.getEquipment())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+
+        compositeDisposable.add(disposable);
+    }
+
+    private void showMessageCompleteRepairEquipment() {
+        Toast.makeText(getApplicationContext(), "Ремонт обрудования был успешно завершен!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorCompleteRepairEquipment() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при завершении ремонта оборудования!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void updateDescriptionProblemEquipment(View view) {
+    }
+
+    public void getListRegServiceByEquipment(View view) {
     }
 
     private void showMessageErrorListEquipments() {
@@ -638,6 +717,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     public void putEquipmentOnRecord(View view) {
+        TypeEquipmentDao typeEquipmentDao = dbApi.typeEquipmentDao();
+        ClientDao clientDao = dbApi.clientDao();
+
         drawerLayout.closeDrawer(GravityCompat.START);
 
         fragmentManager.beginTransaction()
@@ -658,9 +740,22 @@ public class MainSpecialistActivity extends AppCompatActivity {
         fieldDescriptionProblem = findViewById(R.id.field_description_problem);
         buttonAddEquipment = findViewById(R.id.button_add_equipment);
 
+        isExistEmailClient = 0;
+
         Observable<String> emailClientField = RxTextView.textChanges(fieldEmailClient)
                 .skip(1)
                 .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<Integer> isExistEmail = RxTextView.textChanges(fieldEmailClient)
+                .skip(1)
+                .map(CharSequence::toString)
+                .flatMap(string -> clientDao.hasClientByEmail(fieldEmailClient.getText().toString())
+                        .toObservable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .distinctUntilChanged();
@@ -693,12 +788,42 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .distinctUntilChanged();
 
-        Disposable disposable = validFieldsAddEquipment.combineLatest(emailClientField, typeEquipmentField, nameEquipmentField, charactersEquipmentField, descriptionProblemField, this::isValidationFieldsAddEquipment)
+        Disposable disposable = validFieldsAddEquipment.combineLatest(emailClientField, typeEquipmentField, nameEquipmentField, charactersEquipmentField, descriptionProblemField, isExistEmail, this::isValidationFieldsAddEquipment)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::enabledAddEquipment);
 
+        Disposable disposable1 = typeEquipmentDao.getTypesEquipment()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::createListTypesEquipment, throwable -> showMessageErrorListTypesEquipment());
+
         compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable1);
+    }
+
+    private void createListTypesEquipment(List<TypeEquipment> list) {
+        listTypesEquipment = new ArrayList<>();
+
+        for (TypeEquipment typeEquipment : list) {
+            listTypesEquipment.add(typeEquipment.getName());
+        }
+
+        ArrayAdapter<String> adapterTypesEquipment = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, listTypesEquipment);
+        fieldTypeEquipment.setAdapter(adapterTypesEquipment);
+
+        iconDownListTypesEquipment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fieldTypeEquipment.showDropDown();
+            }
+        });
+
+        Toast.makeText(getApplicationContext(), "Успешно сформирован список типов оборудования!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorListTypesEquipment() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка типов оборудования!", Toast.LENGTH_SHORT).show();
     }
 
     private void enabledAddEquipment(boolean validFields) {
@@ -709,15 +834,100 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidationFieldsAddEquipment(String emailClientField, String typeEquipmentField, String nameEquipmentField, String charactersEquipmentField, String descriptionProblemField) {
-        if (idEquipmentField.isEmpty()) {
-            fieldIdEquipment.setError("Вы не ввели значение идентификатора оборудования!");
-            isValidIdEquipment = false;
+    private boolean isValidationFieldsAddEquipment(String emailClientField, String typeEquipmentField, String nameEquipmentField, String charactersEquipmentField, String descriptionProblemField, int isExistEmail) {
+        if (emailClientField.isEmpty()) {
+            fieldEmailClient.setError("Вы не ввели значение эл.почты!");
+            isValidEmailClient = false;
+        } else if (isExistEmail != 1) {
+            fieldEmailClient.setError("Вы ввели несуществующий адрес эл. почты!");
+            isValidEmailClient = false;
+        } else if (!emailClientField.contains("@")) {
+            fieldEmailClient.setError("Вы ввели неверное значение эл.почты! Отсутствует '@'.");
+            isValidEmailClient = false;
+        } else if (emailClientField.length() < 4) {
+            fieldEmailClient.setError("Имя почтового ящика должно состоять из 4 или более символов!");
+            isValidEmailClient = false;
+        } else if (emailClientField.length() > 45) {
+            fieldEmailClient.setError("Эл.почта не должна превышать 45 символов!");
+            isValidEmailClient = false;
         } else {
-            isValidIdEquipment = true;
+            isValidEmailClient = true;
         }
 
-        return isValidIdEquipment;
+        if (typeEquipmentField.isEmpty()) {
+            fieldTypeEquipment.setError("Вы не ввели значение типа обрудования!");
+            isValidTypeEquipment = false;
+        } else {
+            isValidTypeEquipment = true;
+        }
+
+        if (nameEquipmentField.isEmpty()) {
+            fieldNameEquipment.setError("Вы не ввели значение наименование оборудования!");
+            isValidNameEquipment = false;
+        } else {
+            isValidNameEquipment = true;
+        }
+
+        if (charactersEquipmentField.length() > 400) {
+            fieldCharactersEquipment.setError("Описание тех. характеристик не должно превышать 400 символов!");
+            isValidCharactersEquipment = false;
+        } else {
+            isValidCharactersEquipment = true;
+        }
+
+        if (descriptionProblemField.isEmpty()) {
+            fieldDescriptionProblem.setError("Вы не ввели значение описания проблемы!");
+            isValidDescriptionProblem = false;
+        } else {
+            isValidDescriptionProblem = true;
+        }
+
+        return isValidEmailClient && isValidTypeEquipment && isValidNameEquipment && isValidCharactersEquipment && isValidDescriptionProblem;
     }
 
+    public void addEquipment(View view) {
+        EquipmentDao equipmentDao = dbApi.equipmentDao();
+
+        Equipment equipment;
+
+        if (fieldCharactersEquipment.getText() != null) {
+            equipment = new Equipment(
+                    fieldTypeEquipment.getText().toString(),
+                    fieldEmailClient.getText().toString(),
+                    fieldNameEquipment.getText().toString(),
+                    fieldCharactersEquipment.getText().toString(),
+                    fieldDescriptionProblem.getText().toString(),
+                    false);
+
+            Disposable disposable = equipmentDao.insert(equipment)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showMessageSuccessAddEquipment, throwable -> showMessageErrorAddEquipment());
+
+            compositeDisposable.add(disposable);
+        } else {
+            equipment = new Equipment(
+                    fieldTypeEquipment.getText().toString(),
+                    fieldEmailClient.getText().toString(),
+                    fieldNameEquipment.getText().toString(),
+                    null,
+                    fieldDescriptionProblem.getText().toString(),
+                    false);
+
+            Disposable disposable = equipmentDao.insert(equipment)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showMessageSuccessAddEquipment, throwable -> showMessageErrorAddEquipment());
+
+            compositeDisposable.add(disposable);
+        }
+    }
+
+    private void showMessageSuccessAddEquipment() {
+        Toast.makeText(getApplicationContext(), "Успешно добавлено оборудование и поставлено на учет!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorAddEquipment() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при добалении и постановке оборудования на учет!", Toast.LENGTH_SHORT).show();
+    }
 }

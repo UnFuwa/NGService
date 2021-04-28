@@ -57,6 +57,15 @@ public class Equipment {
 
     public Equipment() { }
 
+    public Equipment(@NonNull String nameType, @NonNull String emailClient, @NonNull String name, @Nullable String characters, @NonNull String descriptionProblem, boolean statusRepair) {
+        this.nameType = nameType;
+        this.emailClient = emailClient;
+        this.name = name;
+        this.characters = characters;
+        this.descriptionProblem = descriptionProblem;
+        this.statusRepair = statusRepair;
+    }
+
     @NonNull
     public int getId() {
         return id;

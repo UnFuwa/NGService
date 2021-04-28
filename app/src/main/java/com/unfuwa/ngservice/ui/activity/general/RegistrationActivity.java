@@ -194,7 +194,7 @@ public class RegistrationActivity extends AppCompatActivity {
             fieldEmail.setError("Имя почтового ящика должно состоять из 4 или более символов!");
             isValidEmail = false;
         } else if (emailField.length() > 45) {
-            fieldEmail.setError("Эл.почта не должена превышать 45 символов!");
+            fieldEmail.setError("Эл.почта не должна превышать 45 символов!");
             isValidEmail = false;
         } else {
             isValidEmail = true;

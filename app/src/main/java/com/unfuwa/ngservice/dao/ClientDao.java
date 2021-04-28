@@ -19,6 +19,9 @@ public interface ClientDao {
     @Query("SELECT * FROM Clients WHERE email = :email")
     Single<ClientUser> getClientByEmail(String email);
 
+    @Query("SELECT EXISTS(SELECT * FROM Clients WHERE email = :email)")
+    Single<Integer> hasClientByEmail(String email);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insert(Client client);
 
