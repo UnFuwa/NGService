@@ -40,6 +40,7 @@ import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
+import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
 import com.unfuwa.ngservice.dao.TypeEquipmentDao;
 import com.unfuwa.ngservice.extendedmodel.ClientUser;
@@ -59,6 +60,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.EquipmentDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.RegServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.ServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TaskWorkDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
@@ -128,12 +130,18 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private EditText fieldNameEquipmentDetail;
     private EditText fieldCharactersEquipmentDetail;
     private EditText fieldDescriptionProblemDetail;
+    private Button buttonUpdateDescriptionProblem;
     private EquipmentClient equipmentClient;
+
+    private boolean isValidDescriptionProblemDetail;
 
     private ArrayList<Service> listServices;
     private ArrayList<RegServiceExtended> listRegServices;
     private AdapterListRegService adapterListRegServices;
     private ListView listViewRegService;
+    private TextView sumPriceRegService;
+    private double sumPrice = 0.0;
+    private int countServices = 0;
 
     private ArrayList<String> listTypesEquipment;
     private EditText fieldEmailClient;
@@ -170,6 +178,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private GraphWorkFragment graphWorkFragment;
     private ServiceEquipmentFragment serviceEquipmentFragment;
     private EquipmentDetailFragment equipmentDetailFragment;
+    private RegServiceEquipmentFragment regServiceEquipmentFragment;
     private AddEquipmentFragment addEquipmentFragment;
 
     private void initComponents() {
@@ -220,6 +229,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         graphWorkFragment = new GraphWorkFragment();
         serviceEquipmentFragment = new ServiceEquipmentFragment();
         equipmentDetailFragment = new EquipmentDetailFragment();
+        regServiceEquipmentFragment = new RegServiceEquipmentFragment();
         addEquipmentFragment = new AddEquipmentFragment();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -239,6 +249,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
                 .add(R.id.fragment_container, serviceEquipmentFragment, "ServiceEquipment")
                 .add(R.id.fragment_container, equipmentDetailFragment, "EquipmentDetail")
+                .add(R.id.fragment_container, regServiceEquipmentFragment, "RegServiceEquipment")
                 .add(R.id.fragment_container, addEquipmentFragment, "AddEquipment")
                 .show(mainSpecialistFragment)
                 .hide(knowledgeFragment)
@@ -247,6 +258,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .hide(graphWorkFragment)
                 .hide(serviceEquipmentFragment)
                 .hide(equipmentDetailFragment)
+                .hide(regServiceEquipmentFragment)
                 .hide(addEquipmentFragment)
                 .commit();
 
@@ -636,7 +648,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Disposable disposable = equipmentDao.getListEquipment()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::createListEquipments, throwable -> showMessageErrorListEquipments());
+                .subscribe(this::createListEquipments, throwable -> throwable.printStackTrace());
 
         compositeDisposable.add(disposable);
     }
@@ -662,7 +674,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 activeFragment = equipmentDetailFragment;
 
                 nameFragment.setText("Подробнее об оборудовании");
-                nameFragment.setTextSize(15);
+                nameFragment.setTextSize(13);
 
                 idEquipmentDetail = findViewById(R.id.id_equipment_detail);
                 fieldEmailClientDetail = findViewById(R.id.field_email_client_detail);
@@ -670,19 +682,58 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 fieldNameEquipmentDetail = findViewById(R.id.field_name_equipment_detail);
                 fieldCharactersEquipmentDetail = findViewById(R.id.field_characters_detail);
                 fieldDescriptionProblemDetail = findViewById(R.id.field_description_problem_detail);
+                buttonUpdateDescriptionProblem = findViewById(R.id.button_update_description_problem_equipment);
 
                 equipmentClient = adapterListEquipment.getItem(position);
 
-                idEquipmentDetail.setText(Integer.toString(equipmentClient.getEquipment().getId()));
+                idEquipmentDetail.setText("Оборудование № " + Integer.toString(equipmentClient.getEquipment().getId()));
                 fieldEmailClientDetail.setText(equipmentClient.getClient().getEmail());
                 fieldTypeEquipmentDetail.setText(equipmentClient.getEquipment().getNameType());
                 fieldNameEquipmentDetail.setText(equipmentClient.getEquipment().getName());
                 fieldCharactersEquipmentDetail.setText(equipmentClient.getEquipment().getCharacters());
                 fieldDescriptionProblemDetail.setText(equipmentClient.getEquipment().getDescriptionProblem());
+
+                Observable<String> descriptionProblemEquipmentField = RxTextView.textChanges(fieldDescriptionProblemDetail)
+                        .skip(1)
+                        .map(CharSequence::toString)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .distinctUntilChanged();
+
+                Disposable disposable = descriptionProblemEquipmentField
+                        .map(this::isValidationFieldsEquipmentDetailFragment)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::enabledUpdateDescriptionProblem);
+
+                compositeDisposable.add(disposable);
+            }
+
+            private void enabledUpdateDescriptionProblem(boolean validFields) {
+                if (validFields) {
+                    buttonUpdateDescriptionProblem.setEnabled(true);
+                } else {
+                    buttonUpdateDescriptionProblem.setEnabled(false);
+                }
+            }
+
+            private boolean isValidationFieldsEquipmentDetailFragment(String descriptionProblemEquipmentField) {
+                if (descriptionProblemEquipmentField.isEmpty()) {
+                    fieldDescriptionProblemDetail.setError("Вы не ввели значение описания проблемы!");
+                    isValidDescriptionProblemDetail = false;
+                } else {
+                    isValidDescriptionProblemDetail = true;
+                }
+
+                return isValidDescriptionProblemDetail;
             }
         });
 
         Toast.makeText(getApplicationContext(), "Успешно сформирован список оборудования на учете!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorListEquipments() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оборудования на учете!", Toast.LENGTH_SHORT).show();
     }
 
     public void setStatusRepairCompleteEquipment(View view) {
@@ -707,13 +758,87 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     public void updateDescriptionProblemEquipment(View view) {
+        EquipmentDao equipmentDao = dbApi.equipmentDao();
+
+        equipmentClient.getEquipment().setDescriptionProblem(fieldDescriptionProblemDetail.getText().toString());
+
+        Disposable disposable = equipmentDao.update(equipmentClient.getEquipment())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showMessageUpdateDescriptionEquipment, throwable -> showMessageErrorUpdateDescriptionEquipment());
+
+        compositeDisposable.add(disposable);
+    }
+
+    private void showMessageUpdateDescriptionEquipment() {
+        Toast.makeText(getApplicationContext(), "Описания пробелмы обрудования было успешно изменено!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorUpdateDescriptionEquipment() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при изменении описания проблемы оборудования!", Toast.LENGTH_SHORT).show();
     }
 
     public void getListRegServiceByEquipment(View view) {
+        RegServiceDao regServiceDao = dbApi.regServiceDao();
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(regServiceEquipmentFragment)
+                .commit();
+
+        listViewRegService = findViewById(R.id.list_reg_service_equipment);
+        sumPriceRegService = findViewById(R.id.sum_price_reg_service_equipment);
+
+        activeFragment = regServiceEquipmentFragment;
+
+        Disposable disposable = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addRegService, throwable -> showMessageErrorRegService());
+
+        compositeDisposable.add(disposable);
     }
 
-    private void showMessageErrorListEquipments() {
-        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оборудования на учете!", Toast.LENGTH_SHORT).show();
+    private void addRegService(List<RegServiceExtended> regServicesExtended) {
+        ArrayList<Double> listPrices = new ArrayList<>();
+
+        listRegServices = new ArrayList<>(regServicesExtended);
+
+        for(RegServiceExtended regServiceExtended : listRegServices) {
+            listPrices.add(regServiceExtended.getService().getPrice());
+        }
+
+        Disposable disposable = Observable.fromIterable(listPrices)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showMessageSuccessSumPrice, throwable -> showMessageErrorSumPrice());
+
+        compositeDisposable.add(disposable);
+
+        adapterListRegServices = new AdapterListRegService(getApplicationContext(), R.layout.list_reg_services, listRegServices);
+        listViewRegService.setAdapter(adapterListRegServices);
+
+        Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showMessageSuccessSumPrice(Double price) {
+        sumPrice += price;
+        countServices++;
+
+        if (listRegServices.size() == countServices) {
+            sumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
+
+            Toast.makeText(getApplicationContext(), "Успешно вычислена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showMessageErrorSumPrice() {
+        Toast.makeText(getApplicationContext(), "Не удалось вычислить сумму оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorRegService() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оказанных услуг!", Toast.LENGTH_SHORT).show();
     }
 
     public void putEquipmentOnRecord(View view) {

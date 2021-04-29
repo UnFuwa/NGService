@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/custom_block_fragment">
+        android:background="@drawable/custom_block_fragment"
+        android:descendantFocusability="blocksDescendants">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,6 +34,7 @@
                 android:id="@+id/field_id_equipment_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:editable="false"
                 android:paddingStart="5dp"
                 android:text="Идентификатор оборудования"
                 android:gravity="start|center_vertical"
@@ -58,6 +60,7 @@
                 android:id="@+id/field_name_equipment_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:editable="false"
                 android:paddingStart="5dp"
                 android:text="Наименование оборудования"
                 android:gravity="start|center_vertical"
@@ -91,6 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_margin="5dp"
+                android:editable="false"
                 android:paddingStart="5dp"
                 android:text="Значение"
                 android:gravity="start|center_vertical"
@@ -125,6 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_margin="5dp"
+                android:editable="false"
                 android:paddingStart="5dp"
                 android:text="Значение"
                 android:gravity="start|center_vertical"

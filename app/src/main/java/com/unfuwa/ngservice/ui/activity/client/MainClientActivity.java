@@ -411,7 +411,9 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
                 .doOnTerminate(loadingDialog::hideLoading)
-                .subscribe(this::showMessageSuccessStatusRepair, throwable -> showMessageErrorStatusRepair());;
+                .subscribe(this::showMessageSuccessStatusRepair, throwable -> showMessageErrorStatusRepair());
+
+        compositeDisposable.add(disposable);
     }
 
     private void showMessageSuccessStatusRepair(Equipment equipment) {
