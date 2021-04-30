@@ -55,6 +55,13 @@ public class RegService {
 
     public RegService() { }
 
+    public RegService(int idEquipment, @NonNull String loginSpeciliast, @NonNull String nameService, @Nullable String description) {
+        this.idEquipment = idEquipment;
+        this.loginSpeciliast = loginSpeciliast;
+        this.nameService = nameService;
+        this.description = description;
+    }
+
     @NonNull
     public int getId() {
         return id;

@@ -41,6 +41,7 @@ import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
+import com.unfuwa.ngservice.dao.ServiceDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
 import com.unfuwa.ngservice.dao.TypeEquipmentDao;
 import com.unfuwa.ngservice.extendedmodel.ClientUser;
@@ -51,6 +52,7 @@ import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
 import com.unfuwa.ngservice.model.Client;
 import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.Notification;
+import com.unfuwa.ngservice.model.RegService;
 import com.unfuwa.ngservice.model.Service;
 import com.unfuwa.ngservice.model.TaskWork;
 import com.unfuwa.ngservice.model.TypeEquipment;
@@ -66,11 +68,13 @@ import com.unfuwa.ngservice.ui.fragment.specialist.TaskWorkDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
 import com.unfuwa.ngservice.util.adapter.AdapterListEquipment;
 import com.unfuwa.ngservice.util.adapter.AdapterListRegService;
+import com.unfuwa.ngservice.util.adapter.AdapterListServices;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWork;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWorkToday;
 import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
 import com.unfuwa.ngservice.util.database.DatabaseApi;
 import com.unfuwa.ngservice.util.database.DateConverter;
+import com.unfuwa.ngservice.util.email.GMailSender;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -79,9 +83,12 @@ import java.util.Date;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MainSpecialistActivity extends AppCompatActivity {
@@ -132,16 +139,25 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private EditText fieldDescriptionProblemDetail;
     private Button buttonUpdateDescriptionProblem;
     private EquipmentClient equipmentClient;
+    private double sumPriceEmailSend = 0.0;
+    private int countPricesEmailSend = 0;
 
     private boolean isValidDescriptionProblemDetail;
 
+    private EditText fieldIdEquipmentAddService;
+    private AutoCompleteTextView fieldAddService;
+    private ImageView iconDownListServices;
+    private EditText fieldDescriptionAddService;
     private ArrayList<Service> listServices;
     private ArrayList<RegServiceExtended> listRegServices;
+    private AdapterListServices adapterListServices;
     private AdapterListRegService adapterListRegServices;
     private ListView listViewRegService;
     private TextView sumPriceRegService;
     private double sumPrice = 0.0;
     private int countServices = 0;
+    private Service service;
+    private RegService regService;
 
     private ArrayList<String> listTypesEquipment;
     private EditText fieldEmailClient;
@@ -648,7 +664,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Disposable disposable = equipmentDao.getListEquipment()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::createListEquipments, throwable -> throwable.printStackTrace());
+                .subscribe(this::createListEquipments, throwable -> showMessageErrorListEquipments());
 
         compositeDisposable.add(disposable);
     }
@@ -737,7 +753,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     public void setStatusRepairCompleteEquipment(View view) {
+        RegServiceDao regServiceDao = dbApi.regServiceDao();
         EquipmentDao equipmentDao = dbApi.equipmentDao();
+        GMailSender gMailSender = new GMailSender();
 
         equipmentClient.getEquipment().setStatusRepair(true);
 
@@ -746,7 +764,55 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
 
+        Disposable disposable1 = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::startCalculationSumPriceEmail, Throwable::printStackTrace);
+
+        Disposable disposable2 = Completable.fromAction(new Action() {
+                    @Override
+                    public void run() throws Throwable {
+                        gMailSender.sendMail(
+                        "Оповещение об выполнении сервисного обслуживания оборудования" + " " + Integer.toString(equipmentClient.getEquipment().getId()),
+                        "Здравствуйте " + equipmentClient.getClient().getFName() + " " + equipmentClient.getClient().getIName() + " " + equipmentClient.getClient().getOName() + " "
+                                + " мы рады вас уведомить, что оборудование с идентификатором" + " " + Integer.toString(equipmentClient.getEquipment().getId()) + " " + "полностью исправно!" + "\n"
+                                + "Сумма оплаты составляет: " + Double.toString(sumPriceEmailSend) + ". Ждем вас в сервисном центре. Спасибо, что выбираете нас!",
+                        "ru.unfuwa.callboard@gmail.com", equipmentClient.getClient().getEmail());
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+
         compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable1);
+        compositeDisposable.add(disposable2);
+    }
+
+    private void startCalculationSumPriceEmail(List<RegServiceExtended> list) {
+        ArrayList<Double> listPricesEmail = new ArrayList<>();
+        ArrayList<RegServiceExtended> listRegServiceEmail = new ArrayList<>(list);
+
+        for(RegServiceExtended regServiceExtended : listRegServiceEmail) {
+            listPricesEmail.add(regServiceExtended.getService().getPrice());
+        }
+
+        Disposable disposable = Observable.fromIterable(listPricesEmail)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::calculationSumPriceEmail, Throwable::printStackTrace);
+
+        compositeDisposable.add(disposable);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void calculationSumPriceEmail(Double price) {
+        sumPriceEmailSend += price;
+        countPricesEmailSend++;
+
+        if (countPricesEmailSend == 0) {
+            sumPriceEmailSend = 0;
+        }
     }
 
     private void showMessageCompleteRepairEquipment() {
@@ -778,25 +844,66 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при изменении описания проблемы оборудования!", Toast.LENGTH_SHORT).show();
     }
 
+    @SuppressLint("SetTextI18n")
     public void getListRegServiceByEquipment(View view) {
         RegServiceDao regServiceDao = dbApi.regServiceDao();
+        ServiceDao serviceDao = dbApi.serviceDao();
 
         fragmentManager.beginTransaction()
                 .hide(activeFragment)
                 .show(regServiceEquipmentFragment)
                 .commit();
 
+        activeFragment = regServiceEquipmentFragment;
+
+        nameFragment.setText("Услуги оборудования");
+        nameFragment.setTextSize(16);
+
+        fieldIdEquipmentAddService = findViewById(R.id.field_id_equipment_add_service);
+        fieldAddService = findViewById(R.id.field_add_service);
+        fieldAddService.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                service = adapterListServices.getItem(position);
+                fieldAddService.setText(service.getName() + ", " + Double.toString(service.getPrice()) + " руб.");
+            }
+        });
+        iconDownListServices = findViewById(R.id.ic_down_list_services);
+        fieldDescriptionAddService = findViewById(R.id.field_description_add_service);
         listViewRegService = findViewById(R.id.list_reg_service_equipment);
         sumPriceRegService = findViewById(R.id.sum_price_reg_service_equipment);
 
-        activeFragment = regServiceEquipmentFragment;
+        fieldIdEquipmentAddService.setText(Integer.toString(equipmentClient.getEquipment().getId()));
 
         Disposable disposable = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::addRegService, throwable -> showMessageErrorRegService());
 
+        Disposable disposable1 = serviceDao.getServices()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::createListServices, throwable -> showMessageErrorListServices());
+
         compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable1);
+    }
+
+    private void createListServices(List<Service> list) {
+        listServices = new ArrayList<>(list);
+
+        adapterListServices = new AdapterListServices(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, listServices);
+        fieldAddService.setAdapter(adapterListServices);
+
+        Toast.makeText(getApplicationContext(), "Успешно сформирован список услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorListServices() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void showListServices(View view) {
+        fieldAddService.showDropDown();
     }
 
     private void addRegService(List<RegServiceExtended> regServicesExtended) {
@@ -809,7 +916,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
 
         Disposable disposable = Observable.fromIterable(listPrices)
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showMessageSuccessSumPrice, throwable -> showMessageErrorSumPrice());
 
@@ -830,6 +937,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
             sumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
 
             Toast.makeText(getApplicationContext(), "Успешно вычислена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
+        } else if (listRegServices.size() == 0) {
+            sumPriceRegService.setText("ИТОГО: 0 руб.");
+
+            Toast.makeText(getApplicationContext(), "Cписок оказанных услуг пуст!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -839,6 +950,56 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private void showMessageErrorRegService() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка оказанных услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void addItemListRegService(View view) {
+        RegServiceDao regServiceDao = dbApi.regServiceDao();
+
+        if (!fieldDescriptionAddService.getText().toString().isEmpty()) {
+            Disposable disposable = regServiceDao.addRegServiceByEquipment(
+                    regService = new RegService(
+                            equipmentClient.getEquipment().getId(),
+                            specialist.getSpecialist().getLogin(),
+                            service.getName(),
+                            fieldDescriptionAddService.getText().toString()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::addService, throwable -> showMessageErrorAddRegService());
+
+            compositeDisposable.add(disposable);
+        } else {
+            Disposable disposable = regServiceDao.addRegServiceByEquipment(
+                    regService = new RegService(
+                            equipmentClient.getEquipment().getId(),
+                            specialist.getSpecialist().getLogin(),
+                            service.getName(),
+                            null))
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::addService, throwable -> showMessageErrorAddRegService());
+
+            compositeDisposable.add(disposable);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void addService() {
+        listRegServices.add(new RegServiceExtended(regService, service));
+
+        sumPrice += service.getPrice();
+
+        sumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
+
+        Toast.makeText(getApplicationContext(), "Успешно обновлена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
+
+        adapterListRegServices = new AdapterListRegService(getApplicationContext(), R.layout.list_reg_services, listRegServices);
+        listViewRegService.setAdapter(adapterListRegServices);
+
+        Toast.makeText(getApplicationContext(), "Успешно обновлен список оказанных услуг!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorAddRegService() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при добавлении услуги!", Toast.LENGTH_SHORT).show();
     }
 
     public void putEquipmentOnRecord(View view) {
@@ -937,14 +1098,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterTypesEquipment = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, listTypesEquipment);
         fieldTypeEquipment.setAdapter(adapterTypesEquipment);
 
-        iconDownListTypesEquipment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fieldTypeEquipment.showDropDown();
-            }
-        });
-
         Toast.makeText(getApplicationContext(), "Успешно сформирован список типов оборудования!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void showListTypesEquipment(View view) {
+        fieldTypeEquipment.showDropDown();
     }
 
     private void showMessageErrorListTypesEquipment() {
@@ -1015,7 +1173,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         Equipment equipment;
 
-        if (fieldCharactersEquipment.getText() != null) {
+        if (!fieldCharactersEquipment.getText().toString().isEmpty()) {
             equipment = new Equipment(
                     fieldTypeEquipment.getText().toString(),
                     fieldEmailClient.getText().toString(),

@@ -336,7 +336,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/memory/baseline_memory_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/checklist/baseline_checklist_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -347,7 +347,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="181818" />
-                            <entry key="outputName" value="ic_name_equipment" />
+                            <entry key="outputName" value="ic_id_equipment_add_service" />
                             <entry key="sourceFile" value="D:\ProjectsAndroid\NGService" />
                           </map>
                         </option>

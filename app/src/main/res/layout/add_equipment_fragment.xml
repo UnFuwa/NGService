@@ -82,7 +82,7 @@
                     android:src="@drawable/ic_down_list"
                     android:layout_toRightOf="@+id/field_type_equipment"
                     android:layout_centerVertical="true"
-                    android:onClick=""
+                    android:onClick="showListTypesEquipment"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:scaleType="centerCrop"/>

@@ -17,6 +17,11 @@ public class RegServiceExtended {
     @Relation(parentColumn = "NameService", entityColumn = "Name")
     private Service service;
 
+    public RegServiceExtended(RegService regService, Service service) {
+        this.regService = regService;
+        this.service = service;
+    }
+
     public RegService getRegService() {
         return regService;
     }
