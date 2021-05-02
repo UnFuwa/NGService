@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    tools:context=".ui.fragment.specialist.CategoryKnowledgeFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="start"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/id_equipment_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_marginBottom="10dp"
+            android:text="Подкатегории"
+            android:textStyle="bold"
+            android:textColor="@color/DarkGreenCyan"
+            android:textAllCaps="false"
+            android:textSize="20sp"/>
+
+        <RelativeLayout
+            android:id="@+id/relative_layout_1"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:elevation="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/custom_search_maps">
+
+            <ImageView
+                android:id="@+id/ic_search"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/ic_search"/>
+
+            <EditText
+                android:id="@+id/field_search_subcategories"
+                android:layout_width="240dp"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@id/ic_search"
+                android:layout_centerVertical="true"
+                android:textSize="14sp"
+                android:textColor="@color/White"
+                android:hint="Поиск подкатегории"
+                android:textColorHint="#B5B5B5"
+                android:inputType="text"
+                android:onClick="startAutoCompletePlace"/>
+
+            <Button
+                android:id="@+id/button_search_location"
+                android:onClick="searchSubcategories"
+                android:layout_toRightOf="@id/field_search_subcategories"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:background="@drawable/search_maps_button"
+                android:fontFamily="@font/aqum"
+                android:text="Найти"
+                android:layout_centerVertical="true"
+                android:textAllCaps="false"
+                android:textColor="#174A42"
+                android:textSize="12sp"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:orientation="vertical"
+            android:background="@drawable/custom_block_fragment">
+
+            <ListView
+                android:id="@+id/list_subcategories"
+                android:layout_width="match_parent"
+                android:layout_height="500dp"
+                android:background="@drawable/custom_block_fragment">
+
+            </ListView>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</FrameLayout>

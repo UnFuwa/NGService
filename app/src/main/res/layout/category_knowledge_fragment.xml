@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    tools:context=".ui.fragment.specialist.CategoryKnowledgeFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="start"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/id_equipment_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_marginBottom="10dp"
+            android:text="Категории"
+            android:textStyle="bold"
+            android:textColor="@color/DarkGreenCyan"
+            android:textAllCaps="false"
+            android:textSize="20sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/item_defects_category"
+                android:layout_width="155dp"
+                android:layout_height="165dp"
+                android:orientation="vertical"
+                android:layout_marginEnd="10dp"
+                android:onClick="selectCategory"
+                android:background="@drawable/custom_block_fragment">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/ic_defects_category"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Неполадки"
+                    android:textStyle="bold"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="18sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/item_safety_engineering_category"
+                android:layout_width="155dp"
+                android:layout_height="165dp"
+                android:orientation="vertical"
+                android:onClick="selectCategory"
+                android:background="@drawable/custom_block_fragment">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/ic_safety_engineering_category"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Техника безопасности"
+                    android:textStyle="bold"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/item_maintenance_procedure_category"
+                android:layout_width="155dp"
+                android:layout_height="165dp"
+                android:orientation="vertical"
+                android:layout_marginEnd="10dp"
+                android:onClick="selectCategory"
+                android:background="@drawable/custom_block_fragment">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/ic_maintenance_procedure_category"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Порядок тех. обслуживания"
+                    android:textStyle="bold"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/item_other_category"
+                android:layout_width="155dp"
+                android:layout_height="165dp"
+                android:orientation="vertical"
+                android:onClick="selectCategory"
+                android:background="@drawable/custom_block_fragment">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/ic_other_category"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Дополнительные материалы"
+                    android:textStyle="bold"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</FrameLayout>

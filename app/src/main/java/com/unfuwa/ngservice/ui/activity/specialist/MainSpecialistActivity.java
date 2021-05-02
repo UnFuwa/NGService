@@ -7,7 +7,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,10 +14,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,7 +27,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.jakewharton.rxbinding4.widget.RxTextView;
@@ -44,23 +39,24 @@ import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.ServiceDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
 import com.unfuwa.ngservice.dao.TypeEquipmentDao;
-import com.unfuwa.ngservice.extendedmodel.ClientUser;
 import com.unfuwa.ngservice.extendedmodel.EquipmentClient;
 import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
 import com.unfuwa.ngservice.extendedmodel.RegServiceExtended;
 import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
-import com.unfuwa.ngservice.model.Client;
+import com.unfuwa.ngservice.model.Category;
 import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.Notification;
 import com.unfuwa.ngservice.model.RegService;
 import com.unfuwa.ngservice.model.Service;
+import com.unfuwa.ngservice.model.Subcategory;
 import com.unfuwa.ngservice.model.TaskWork;
 import com.unfuwa.ngservice.model.TypeEquipment;
 import com.unfuwa.ngservice.ui.activity.general.AuthorizationActivity;
 import com.unfuwa.ngservice.ui.fragment.specialist.AddEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.EquipmentDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
-import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.CategoryKnowledgeFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.SubcategoryKnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.RegServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.ServiceEquipmentFragment;
@@ -73,18 +69,17 @@ import com.unfuwa.ngservice.util.adapter.AdapterListTasksWork;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWorkToday;
 import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
 import com.unfuwa.ngservice.util.database.DatabaseApi;
-import com.unfuwa.ngservice.util.database.DateConverter;
 import com.unfuwa.ngservice.util.email.GMailSender;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -110,6 +105,13 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private ListView listViewTasksWorkToday;
     private AdapterListTasksWorkToday adapterListTasksWorkToday;
     private int selectTaskWorkToday;
+
+    private Category category;
+    private Subcategory subcategory;
+    private ArrayList<Subcategory> listSubcategories;
+    private HashSet<Subcategory> hashSetSubcategories;
+    private int capacitySet;
+    private static final double LOAD = 0.75;
 
     private TextView idTaskWork;
     private EditText titleTaskWork;
@@ -188,7 +190,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private Fragment activeFragment;
     private FragmentManager fragmentManager;
     private MainSpecialistFragment mainSpecialistFragment;
-    private KnowledgeFragment knowledgeFragment;
+    private CategoryKnowledgeFragment categoryKnowledgeFragment;
+    private SubcategoryKnowledgeFragment subcategoryKnowledgeFragment;
     private TasksWorkFragment tasksWorkFragment;
     private TaskWorkDetailFragment taskWorkDetailFragment;
     private GraphWorkFragment graphWorkFragment;
@@ -239,7 +242,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
 
         mainSpecialistFragment = new MainSpecialistFragment();
-        knowledgeFragment = new KnowledgeFragment();
+        categoryKnowledgeFragment = new CategoryKnowledgeFragment();
+        subcategoryKnowledgeFragment = new SubcategoryKnowledgeFragment();
         tasksWorkFragment = new TasksWorkFragment();
         taskWorkDetailFragment = new TaskWorkDetailFragment();
         graphWorkFragment = new GraphWorkFragment();
@@ -259,7 +263,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         fragmentManager.beginTransaction()
                 .add(R.id.fragment_container, mainSpecialistFragment, "MainSpecialist")
-                .add(R.id.fragment_container, knowledgeFragment, "Knowledge")
+                .add(R.id.fragment_container, categoryKnowledgeFragment, "CategoryKnowledge")
+                .add(R.id.fragment_container, subcategoryKnowledgeFragment, "SubcategoryKnowledge")
                 .add(R.id.fragment_container, tasksWorkFragment, "TasksWork")
                 .add(R.id.fragment_container, taskWorkDetailFragment, "TaskWorkDetail")
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
@@ -268,7 +273,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, regServiceEquipmentFragment, "RegServiceEquipment")
                 .add(R.id.fragment_container, addEquipmentFragment, "AddEquipment")
                 .show(mainSpecialistFragment)
-                .hide(knowledgeFragment)
+                .hide(categoryKnowledgeFragment)
+                .hide(subcategoryKnowledgeFragment)
                 .hide(tasksWorkFragment)
                 .hide(taskWorkDetailFragment)
                 .hide(graphWorkFragment)
@@ -512,10 +518,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         fragmentManager.beginTransaction()
                 .hide(activeFragment)
-                .show(knowledgeFragment)
+                .show(categoryKnowledgeFragment)
                 .commit();
 
-        activeFragment = knowledgeFragment;
+        activeFragment = categoryKnowledgeFragment;
 
         nameFragment.setText("Справочник");
     }
@@ -776,8 +782,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
                         "Оповещение об выполнении сервисного обслуживания оборудования" + " " + Integer.toString(equipmentClient.getEquipment().getId()),
                         "Здравствуйте " + equipmentClient.getClient().getFName() + " " + equipmentClient.getClient().getIName() + " " + equipmentClient.getClient().getOName() + " "
                                 + " мы рады вас уведомить, что оборудование с идентификатором" + " " + Integer.toString(equipmentClient.getEquipment().getId()) + " " + "полностью исправно!" + "\n"
-                                + "Сумма оплаты составляет: " + Double.toString(sumPriceEmailSend) + ". Ждем вас в сервисном центре. Спасибо, что выбираете нас!",
-                        "ru.unfuwa.callboard@gmail.com", equipmentClient.getClient().getEmail());
+                                + "Сумма оплаты составляет: " + Double.toString(sumPriceEmailSend) + "руб. Ждем вас в сервисном центре. Спасибо, что выбираете нас!",
+                        "ru.unfuwa.ngservice@gmail.com", equipmentClient.getClient().getEmail());
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -1212,5 +1218,44 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private void showMessageErrorAddEquipment() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при добалении и постановке оборудования на учет!", Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressLint({"NonConstantResourceId", "SetTextI18n"})
+    public void selectCategory(View view) {
+        switch (view.getId()) {
+            case R.id.item_defects_category:
+                category = new Category("Неполадки");
+                break;
+            case R.id.item_safety_engineering_category:
+                category = new Category("Техника безопасности");
+                break;
+            case R.id.item_maintenance_procedure_category:
+                category = new Category("Порядок технического обслуживания");
+                break;
+            case R.id.item_other_category:
+                category = new Category("Дополнительные материалы");
+                break;
+            default:
+                category = null;
+                break;
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+
+        fragmentManager.beginTransaction()
+                .hide(activeFragment)
+                .show(subcategoryKnowledgeFragment)
+                .commit();
+
+        activeFragment = subcategoryKnowledgeFragment;
+
+        if (category != null) {
+            nameFragment.setText("Справочник\n(" + category.getName() + ")");
+        } else {
+            nameFragment.setText("Справочник\n(Неопредлено)");
+            Toast.makeText(getApplicationContext(), "Возникла ошибка при определении категории!", Toast.LENGTH_SHORT).show();
+        }
+
+        nameFragment.setTextSize(14);
     }
 }

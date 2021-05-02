@@ -18,7 +18,7 @@ import javax.mail.internet.MimeMessage;
 
 public class GMailSender extends javax.mail.Authenticator {
     private String mailhost = "smtp.gmail.com";
-    private static final String SMTP_AUTH_USER = "ru.unfuwa.callboard@gmail.com";
+    private static final String SMTP_AUTH_USER = "ru.unfuwa.ngservice@gmail.com";
     private static final String SMTP_AUTH_PWD  = "aficloud4124gtaZXCV";
     private Session session;
   
