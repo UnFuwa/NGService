@@ -37,12 +37,14 @@ import com.unfuwa.ngservice.dao.GraphWorkDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.ServiceDao;
+import com.unfuwa.ngservice.dao.SubcategoryDao;
 import com.unfuwa.ngservice.dao.TaskWorkDao;
 import com.unfuwa.ngservice.dao.TypeEquipmentDao;
 import com.unfuwa.ngservice.extendedmodel.EquipmentClient;
 import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
 import com.unfuwa.ngservice.extendedmodel.RegServiceExtended;
 import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
+import com.unfuwa.ngservice.extendedmodel.SubcategoryExtended;
 import com.unfuwa.ngservice.model.Category;
 import com.unfuwa.ngservice.model.Equipment;
 import com.unfuwa.ngservice.model.Notification;
@@ -65,6 +67,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
 import com.unfuwa.ngservice.util.adapter.AdapterListEquipment;
 import com.unfuwa.ngservice.util.adapter.AdapterListRegService;
 import com.unfuwa.ngservice.util.adapter.AdapterListServices;
+import com.unfuwa.ngservice.util.adapter.AdapterListSubcategories;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWork;
 import com.unfuwa.ngservice.util.adapter.AdapterListTasksWorkToday;
 import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
@@ -108,10 +111,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private Category category;
     private Subcategory subcategory;
-    private ArrayList<Subcategory> listSubcategories;
+    private ArrayList<SubcategoryExtended> listSubcategories;
+    private AdapterListSubcategories adapterListSubcategories;
+    private ListView listViewSubcategories;
+    private EditText fieldSearchSubcategories;
     private HashSet<Subcategory> hashSetSubcategories;
-    private int capacitySet;
-    private static final double LOAD = 0.75;
 
     private TextView idTaskWork;
     private EditText titleTaskWork;
@@ -1222,6 +1226,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     @SuppressLint({"NonConstantResourceId", "SetTextI18n"})
     public void selectCategory(View view) {
+        SubcategoryDao subcategoryDao = dbApi.subcategoryDao();
+
         switch (view.getId()) {
             case R.id.item_defects_category:
                 category = new Category("Неполадки");
@@ -1249,13 +1255,36 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         activeFragment = subcategoryKnowledgeFragment;
 
+        fieldSearchSubcategories = findViewById(R.id.field_search_subcategories);
+        listViewSubcategories = findViewById(R.id.list_subcategories);
+
         if (category != null) {
             nameFragment.setText("Справочник\n(" + category.getName() + ")");
+
+            Disposable disposable = subcategoryDao.getSubcategoriesByCategory(category.getName())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::createListSubcategories, throwable -> showMessageErrorListSubcategories());
+
+            compositeDisposable.add(disposable);
         } else {
             nameFragment.setText("Справочник\n(Неопредлено)");
             Toast.makeText(getApplicationContext(), "Возникла ошибка при определении категории!", Toast.LENGTH_SHORT).show();
         }
 
         nameFragment.setTextSize(14);
+    }
+
+    private void createListSubcategories(List<SubcategoryExtended> list) {
+        listSubcategories = new ArrayList<>(list);
+
+        adapterListSubcategories = new AdapterListSubcategories(getApplicationContext(), R.layout.list_subcategory_item, listSubcategories);
+        listViewSubcategories.setAdapter(adapterListSubcategories);
+
+        Toast.makeText(getApplicationContext(), "Успешно сформирован список подкатегорий!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorListSubcategories() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка подкатегорий!", Toast.LENGTH_SHORT).show();
     }
 }
