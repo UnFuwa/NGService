@@ -47,6 +47,7 @@ import com.unfuwa.ngservice.extendedmodel.SpecialistUser;
 import com.unfuwa.ngservice.extendedmodel.SubcategoryExtended;
 import com.unfuwa.ngservice.model.Category;
 import com.unfuwa.ngservice.model.Equipment;
+import com.unfuwa.ngservice.model.KnowledgeBase;
 import com.unfuwa.ngservice.model.Notification;
 import com.unfuwa.ngservice.model.RegService;
 import com.unfuwa.ngservice.model.Service;
@@ -58,6 +59,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.AddEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.EquipmentDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.CategoryKnowledgeFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.SubcategoryKnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.RegServiceEquipmentFragment;
@@ -65,6 +67,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.ServiceEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TaskWorkDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.TasksWorkFragment;
 import com.unfuwa.ngservice.util.adapter.AdapterListEquipment;
+import com.unfuwa.ngservice.util.adapter.AdapterListKnowledge;
 import com.unfuwa.ngservice.util.adapter.AdapterListRegService;
 import com.unfuwa.ngservice.util.adapter.AdapterListServices;
 import com.unfuwa.ngservice.util.adapter.AdapterListSubcategories;
@@ -111,11 +114,14 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private Category category;
     private Subcategory subcategory;
+    private KnowledgeBase knowledgeBase;
     private ArrayList<SubcategoryExtended> listSubcategories;
+    private ArrayList<KnowledgeBase> listKnowledgeBase;
     private AdapterListSubcategories adapterListSubcategories;
+    private AdapterListKnowledge adapterListKnowledge;
     private ListView listViewSubcategories;
-    private EditText fieldSearchSubcategories;
-    private HashSet<Subcategory> hashSetSubcategories;
+    private RecyclerView recyclerViewKnowledgeBase;
+    private AutoCompleteTextView fieldSearchSubcategories;
 
     private TextView idTaskWork;
     private EditText titleTaskWork;
@@ -196,6 +202,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private MainSpecialistFragment mainSpecialistFragment;
     private CategoryKnowledgeFragment categoryKnowledgeFragment;
     private SubcategoryKnowledgeFragment subcategoryKnowledgeFragment;
+    private KnowledgeFragment knowledgeFragment;
     private TasksWorkFragment tasksWorkFragment;
     private TaskWorkDetailFragment taskWorkDetailFragment;
     private GraphWorkFragment graphWorkFragment;
@@ -248,6 +255,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         mainSpecialistFragment = new MainSpecialistFragment();
         categoryKnowledgeFragment = new CategoryKnowledgeFragment();
         subcategoryKnowledgeFragment = new SubcategoryKnowledgeFragment();
+        knowledgeFragment = new KnowledgeFragment();
         tasksWorkFragment = new TasksWorkFragment();
         taskWorkDetailFragment = new TaskWorkDetailFragment();
         graphWorkFragment = new GraphWorkFragment();
@@ -269,6 +277,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, mainSpecialistFragment, "MainSpecialist")
                 .add(R.id.fragment_container, categoryKnowledgeFragment, "CategoryKnowledge")
                 .add(R.id.fragment_container, subcategoryKnowledgeFragment, "SubcategoryKnowledge")
+                .add(R.id.fragment_container, knowledgeFragment, "Knowledge")
                 .add(R.id.fragment_container, tasksWorkFragment, "TasksWork")
                 .add(R.id.fragment_container, taskWorkDetailFragment, "TaskWorkDetail")
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
@@ -279,6 +288,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .show(mainSpecialistFragment)
                 .hide(categoryKnowledgeFragment)
                 .hide(subcategoryKnowledgeFragment)
+                .hide(knowledgeFragment)
                 .hide(tasksWorkFragment)
                 .hide(taskWorkDetailFragment)
                 .hide(graphWorkFragment)
@@ -1105,7 +1115,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
             listTypesEquipment.add(typeEquipment.getName());
         }
 
-        ArrayAdapter<String> adapterTypesEquipment = new ArrayAdapter<>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, listTypesEquipment);
+        ArrayAdapter<String> adapterTypesEquipment = new ArrayAdapter<>(getApplicationContext(), R.layout.list_subcategories_autocomplete, listTypesEquipment);
         fieldTypeEquipment.setAdapter(adapterTypesEquipment);
 
         Toast.makeText(getApplicationContext(), "Успешно сформирован список типов оборудования!", Toast.LENGTH_SHORT).show();
@@ -1257,6 +1267,29 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         fieldSearchSubcategories = findViewById(R.id.field_search_subcategories);
         listViewSubcategories = findViewById(R.id.list_subcategories);
+        listViewSubcategories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                subcategory = adapterListSubcategories.getItem(position).getSubcategory();
+
+                drawerLayout.closeDrawer(GravityCompat.START);
+
+                fragmentManager.beginTransaction()
+                        .hide(activeFragment)
+                        .show(knowledgeFragment)
+                        .commit();
+
+                activeFragment = knowledgeFragment;
+
+                if (subcategory != null) {
+                    nameFragment.setText("Справочник\n(" + subcategory.getName() + ")");
+                    nameFragment.setTextSize(14);
+                } else {
+                    nameFragment.setText("Справочник\n(Неопредлено)");
+                    Toast.makeText(getApplicationContext(), "Возникла ошибка при определении подкатегории!", Toast.LENGTH_SHORT).show();
+                }
+;            }
+        });
 
         if (category != null) {
             nameFragment.setText("Справочник\n(" + category.getName() + ")");
@@ -1279,6 +1312,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         listSubcategories = new ArrayList<>(list);
 
         adapterListSubcategories = new AdapterListSubcategories(getApplicationContext(), R.layout.list_subcategory_item, listSubcategories);
+        fieldSearchSubcategories.setAdapter(adapterListSubcategories);
         listViewSubcategories.setAdapter(adapterListSubcategories);
 
         Toast.makeText(getApplicationContext(), "Успешно сформирован список подкатегорий!", Toast.LENGTH_SHORT).show();

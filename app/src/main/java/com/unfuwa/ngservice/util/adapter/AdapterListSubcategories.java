@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.extendedmodel.GraphTaskWork;
 import com.unfuwa.ngservice.extendedmodel.SubcategoryExtended;
+import com.unfuwa.ngservice.model.Service;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,8 @@ public class AdapterListSubcategories extends ArrayAdapter<SubcategoryExtended> 
     private Context context;
     private int resource;
     private ArrayList<SubcategoryExtended> listSubcategories;
+    private ArrayList<SubcategoryExtended> tempListSubcategories;
+    private ArrayList<SubcategoryExtended> suggestions;
 
     public AdapterListSubcategories(@NonNull Context context, int resource, ArrayList<SubcategoryExtended> listSubcategories) {
         super(context, R.layout.list_subcategory_item, listSubcategories);
@@ -52,5 +56,79 @@ public class AdapterListSubcategories extends ArrayAdapter<SubcategoryExtended> 
         }
 
         return convertView;
+    }
+
+    @Nullable
+    @Override
+    public SubcategoryExtended getItem(int position) {
+        return listSubcategories.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return listSubcategories.size();
+    }
+
+    @NonNull
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+
+            private final Object lock = new Object();
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+
+                if (tempListSubcategories == null) {
+                    synchronized (lock) {
+                        tempListSubcategories = new ArrayList<>(listSubcategories);
+                    }
+                }
+
+                if (constraint != null) {
+                    suggestions = new ArrayList<>();
+
+                    //String filterPattern = constraint.toString().toLowerCase().trim().substring(0, constraint.toString().indexOf(","));
+                    String filterPattern = constraint.toString().toLowerCase();
+
+                    for (SubcategoryExtended subcategoryExtended : tempListSubcategories) {
+                        if (subcategoryExtended.getSubcategory().getName().toLowerCase().contains(filterPattern)) {
+                            suggestions.add(subcategoryExtended);
+                        }
+                    }
+
+                    results.values = suggestions;
+                    results.count = suggestions.size();
+                } else {
+                    synchronized (lock) {
+                        results.values = tempListSubcategories;
+                        results.count = tempListSubcategories.size();
+                    }
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (results.values != null) {
+                    listSubcategories = (ArrayList<SubcategoryExtended>) results.values;
+                } else {
+                    listSubcategories = null;
+                }
+
+                if (results.count > 0) {
+                    notifyDataSetChanged();
+                } else {
+                    notifyDataSetInvalidated();
+                }
+            }
+
+            @Override
+            public CharSequence convertResultToString(Object resultValue) {
+                return ((SubcategoryExtended) resultValue).getSubcategory().getName();
+            }
+        };
     }
 }
