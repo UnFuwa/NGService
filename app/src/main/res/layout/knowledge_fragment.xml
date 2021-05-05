@@ -11,12 +11,11 @@
         android:gravity="start"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="start"
-            android:orientation="vertical"
-            android:background="@color/DarkLightGray">
+            android:background="@color/White">
 
             <RelativeLayout
                 android:id="@+id/relative_layout_1"
@@ -27,7 +26,7 @@
                 android:background="@drawable/custom_search_maps">
 
                 <AutoCompleteTextView
-                    android:id="@+id/field_search_subcategories"
+                    android:id="@+id/field_search_knowledge"
                     android:layout_width="270dp"
                     android:layout_marginLeft="10dp"
                     android:layout_height="match_parent"
@@ -40,7 +39,7 @@
 
                 <ImageView
                     android:id="@+id/ic_search"
-                    android:layout_toEndOf="@id/field_search_subcategories"
+                    android:layout_toEndOf="@id/field_search_knowledge"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_centerVertical="true"
@@ -52,9 +51,10 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_knowledge"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_marginTop="50dp"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
 
     </LinearLayout>

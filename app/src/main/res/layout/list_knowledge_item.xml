@@ -4,88 +4,109 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:background="@color/White">
+    android:padding="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:descendantFocusability="blocksDescendants">
-
-        <ImageView
-            android:id="@+id/image_pdf"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@mipmap/ic_launcher"
-            tools:ignore="ContentDescription"
-            android:cropToPadding="true"
-            android:scaleType="centerCrop"
-            android:background="@drawable/border_upload_photo"/>
+        android:orientation="vertical"
+        android:background="@android:drawable/dialog_holo_light_frame"
+        android:descendantFocusability="blocksDescendants"
+        android:padding="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/image_pdf"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="5dp"
+                android:src="@mipmap/ic_launcher"
+                tools:ignore="ContentDescription"
+                android:cropToPadding="true"
+                android:padding="3dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/border_item_list_tasks_today"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:background="@drawable/border_item_list_tasks_today"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="Тема"
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+                <EditText
+                    android:id="@+id/field_theme_pdf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:paddingStart="5dp"
+                    android:lines="4"
+                    android:text="Значение"
+                    android:gravity="start"
+                    android:inputType="none"
+                    android:textColor="@color/DarkBlack"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:textSize="10sp"
+                    android:autofillHints=""/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginLeft="5dp"
-            android:gravity="center_vertical">
+            android:padding="5dp"
+            android:background="@drawable/border_item_list_tasks_today"
+            android:gravity="center_vertical">\
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal|center_vertical"
-                android:paddingStart="5dp"
-                android:text="Тема"
+                android:text="Краткое описание"
                 android:textStyle="bold|italic"
                 android:textColor="@color/DarkGreenCyan"
                 android:textAllCaps="false"
                 android:textSize="14sp"/>
 
             <EditText
-                android:id="@+id/field_theme_pdf"
+                android:id="@+id/field_short_description_pdf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:paddingStart="5dp"
-                android:lines="3"
+                android:lines="7"
                 android:text="Значение"
                 android:gravity="start"
                 android:inputType="none"
                 android:textColor="@color/DarkBlack"
                 android:textStyle="bold"
                 android:textAllCaps="false"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:autofillHints=""/>
 
         </LinearLayout>
 
     </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal|center_vertical"
-        android:paddingStart="5dp"
-        android:text="Краткое описание"
-        android:textStyle="bold|italic"
-        android:textColor="@color/DarkGreenCyan"
-        android:textAllCaps="false"
-        android:textSize="14sp"/>
-
-    <EditText
-        android:id="@+id/field_short_description_pdf"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:editable="false"
-        android:paddingStart="5dp"
-        android:lines="6"
-        android:text="Значение"
-        android:gravity="start"
-        android:inputType="none"
-        android:textColor="@color/DarkBlack"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        android:textSize="12sp"
-        android:autofillHints=""/>
 
 </LinearLayout>

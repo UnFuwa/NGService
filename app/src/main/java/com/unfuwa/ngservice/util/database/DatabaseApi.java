@@ -14,6 +14,7 @@ import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.FilialCityDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
+import com.unfuwa.ngservice.dao.KnowledgeBaseDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.RequestDao;
@@ -68,7 +69,7 @@ import com.unfuwa.ngservice.model.User;
         TypeNotification.class,
 
     },
-        version = 7,
+        version = 8,
         exportSchema = false
 )
 @TypeConverters({DateConverter.class})
@@ -88,6 +89,7 @@ public abstract class DatabaseApi extends RoomDatabase {
     public abstract ServiceDao serviceDao();
     public abstract TypeEquipmentDao typeEquipmentDao();
     public abstract SubcategoryDao subcategoryDao();
+    public abstract KnowledgeBaseDao knowledgeBaseDao();
 
     private static DatabaseApi INSTANCE;
 

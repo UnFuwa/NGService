@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,11 +30,14 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.dao.ClientDao;
 import com.unfuwa.ngservice.dao.EquipmentDao;
 import com.unfuwa.ngservice.dao.GraphWorkDao;
+import com.unfuwa.ngservice.dao.KnowledgeBaseDao;
 import com.unfuwa.ngservice.dao.NotificationDao;
 import com.unfuwa.ngservice.dao.RegServiceDao;
 import com.unfuwa.ngservice.dao.ServiceDao;
@@ -122,6 +126,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private ListView listViewSubcategories;
     private RecyclerView recyclerViewKnowledgeBase;
     private AutoCompleteTextView fieldSearchSubcategories;
+    private AutoCompleteTextView fieldSearchKnowledge;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
 
     private TextView idTaskWork;
     private EditText titleTaskWork;
@@ -1270,6 +1277,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
         listViewSubcategories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                KnowledgeBaseDao knowledgeBaseDao = dbApi.knowledgeBaseDao();
+
                 subcategory = adapterListSubcategories.getItem(position).getSubcategory();
 
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -1281,6 +1290,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
                 activeFragment = knowledgeFragment;
 
+                storage = FirebaseStorage.getInstance();
+
+                recyclerViewKnowledgeBase = knowledgeFragment.getView().findViewById(R.id.recycler_view_knowledge);
+                fieldSearchKnowledge = findViewById(R.id.field_search_knowledge);
+
                 if (subcategory != null) {
                     nameFragment.setText("Справочник\n(" + subcategory.getName() + ")");
                     nameFragment.setTextSize(14);
@@ -1288,7 +1302,28 @@ public class MainSpecialistActivity extends AppCompatActivity {
                     nameFragment.setText("Справочник\n(Неопредлено)");
                     Toast.makeText(getApplicationContext(), "Возникла ошибка при определении подкатегории!", Toast.LENGTH_SHORT).show();
                 }
-;            }
+
+                Disposable disposable = knowledgeBaseDao.getListKnowledgeBase(subcategory.getName())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::createListKnowledgeBase, throwable -> showMessageErrorListKnowledgeBase());
+
+                compositeDisposable.add(disposable);
+            }
+
+            private void createListKnowledgeBase(List<KnowledgeBase> list) {
+                listKnowledgeBase = new ArrayList<>(list);
+
+                adapterListKnowledge = new AdapterListKnowledge(getApplicationContext(), listKnowledgeBase, storage);
+                recyclerViewKnowledgeBase.setAdapter(adapterListKnowledge);
+                recyclerViewKnowledgeBase.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+                Toast.makeText(getApplicationContext(), "Успешно сформирован список справочных материалов по подкатегории " + subcategory.getName() + "!", Toast.LENGTH_SHORT).show();
+            }
+
+            private void showMessageErrorListKnowledgeBase() {
+                Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка справочных материалов по подкатегории " + subcategory.getName() + "!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         if (category != null) {

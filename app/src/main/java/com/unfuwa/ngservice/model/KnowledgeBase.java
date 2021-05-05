@@ -42,6 +42,10 @@ public class KnowledgeBase {
     @ColumnInfo (name = "URLFullContent")
     private String URL;
 
+    @NonNull
+    @ColumnInfo (name = "URLImage")
+    private String URLImage;
+
     public KnowledgeBase() { }
 
     @NonNull
@@ -96,5 +100,14 @@ public class KnowledgeBase {
 
     public void setURL(@NonNull String URL) {
         this.URL = URL;
+    }
+
+    @NonNull
+    public String getURLImage() {
+        return URLImage;
+    }
+
+    public void setURLImage(@NonNull String URLImage) {
+        this.URLImage = URLImage;
     }
 }

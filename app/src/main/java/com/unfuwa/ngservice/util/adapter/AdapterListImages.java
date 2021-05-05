@@ -19,6 +19,10 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class AdapterListImages extends ArrayAdapter<Photo> {
 
     private ImageView imageView;
