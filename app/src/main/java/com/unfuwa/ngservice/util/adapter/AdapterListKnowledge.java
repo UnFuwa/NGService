@@ -8,7 +8,10 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +27,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.extendedmodel.Photo;
+import com.unfuwa.ngservice.extendedmodel.SubcategoryExtended;
 import com.unfuwa.ngservice.model.KnowledgeBase;
 import com.unfuwa.ngservice.model.Notification;
 
@@ -35,7 +39,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowledge.ViewHolder> {
+public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowledge.ViewHolder> implements Filterable {
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -43,9 +47,11 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
     private final StorageReference storageReference;
 
     private final Context context;
-    private final ArrayList<KnowledgeBase> listKnowledgeBase;
+    private ArrayList<KnowledgeBase> listKnowledgeBase;
+    private ArrayList<KnowledgeBase> tempListKnowledgeBase;
+    private ArrayList<KnowledgeBase> suggestions;
 
-    private int i = 0;
+    private int i;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -91,6 +97,8 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
 
     @Override
     public void onBindViewHolder(@NonNull AdapterListKnowledge.ViewHolder holder, int position) {
+        i = 0;
+
         Disposable disposable = Flowable.just(listKnowledgeBase.get(position))
                 .doOnNext(knowledgeBase -> {
                     StorageReference requestRef = storageReference.child("full_content_knowledgebase/image/" + knowledgeBase.getURLImage());
@@ -132,5 +140,69 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
     @Override
     public int getItemCount() {
         return listKnowledgeBase.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+
+            private final Object lock = new Object();
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+
+                if (tempListKnowledgeBase == null) {
+                    synchronized (lock) {
+                        tempListKnowledgeBase = new ArrayList<>(listKnowledgeBase);
+                    }
+                }
+
+                if (constraint != null) {
+                    suggestions = new ArrayList<>();
+
+                    //String filterPattern = constraint.toString().toLowerCase().trim().substring(0, constraint.toString().indexOf(","));
+                    String filterPattern = constraint.toString().toLowerCase().trim();
+
+                    for (KnowledgeBase knowledgeBase : tempListKnowledgeBase) {
+                        if (knowledgeBase.getTheme().toLowerCase().contains(filterPattern)) {
+                            suggestions.add(knowledgeBase);
+                        } else if (knowledgeBase.getFullDescription().toLowerCase().contains(filterPattern)) {
+                            suggestions.add(knowledgeBase);
+                        }
+                    }
+
+                    results.values = suggestions;
+                    results.count = suggestions.size();
+                } else {
+                    synchronized (lock) {
+                        results.values = tempListKnowledgeBase;
+                        results.count = tempListKnowledgeBase.size();
+                    }
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (results.values != null) {
+                    listKnowledgeBase = (ArrayList<KnowledgeBase>) results.values;
+                } else {
+                    listKnowledgeBase = null;
+                }
+
+                if (results.count > 0) {
+                    notifyDataSetChanged();
+                } else {
+                    Toast.makeText(context, "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public CharSequence convertResultToString(Object resultValue) {
+                return ((KnowledgeBase) resultValue).getTheme();
+            }
+        };
     }
 }

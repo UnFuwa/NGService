@@ -2,6 +2,7 @@ package com.unfuwa.ngservice.ui.activity.specialist;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -16,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -87,9 +89,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -126,7 +130,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private ListView listViewSubcategories;
     private RecyclerView recyclerViewKnowledgeBase;
     private AutoCompleteTextView fieldSearchSubcategories;
-    private AutoCompleteTextView fieldSearchKnowledge;
+    private SearchView fieldSearchKnowledge;
     private FirebaseStorage storage;
     private StorageReference storageReference;
 
@@ -1317,6 +1321,52 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 adapterListKnowledge = new AdapterListKnowledge(getApplicationContext(), listKnowledgeBase, storage);
                 recyclerViewKnowledgeBase.setAdapter(adapterListKnowledge);
                 recyclerViewKnowledgeBase.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                fieldSearchKnowledge.setQueryHint("Поиск");
+                fieldSearchKnowledge.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        Disposable disposable = Completable.fromAction(new Action() {
+                            @Override
+                            public void run() throws Throwable {
+                                adapterListKnowledge.getFilter().filter(query);
+                            }
+                        })
+                                .delay(5000, TimeUnit.MILLISECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::showMessageCompleteSearch, this::showMessageErrorSearch);
+
+                        compositeDisposable.add(disposable);
+
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        Disposable disposable = Completable.fromAction(new Action() {
+                                @Override
+                                public void run() throws Throwable {
+                                    adapterListKnowledge.getFilter().filter(newText);
+                                }
+                            })
+                                .delay(5000, TimeUnit.MILLISECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::showMessageCompleteSearch, this::showMessageErrorSearch);
+
+                        compositeDisposable.add(disposable);
+
+                        return true;
+                    }
+
+                    private void showMessageCompleteSearch() {
+                        //Toast.makeText(getApplicationContext(), "Успешно сформированы результаты поиска!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    private void showMessageErrorSearch(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
                 Toast.makeText(getApplicationContext(), "Успешно сформирован список справочных материалов по подкатегории " + subcategory.getName() + "!", Toast.LENGTH_SHORT).show();
             }
@@ -1355,5 +1405,16 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private void showMessageErrorListSubcategories() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка подкатегорий!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_search);
+
+        if (fieldSearchKnowledge != null) {
+            fieldSearchKnowledge = (SearchView) item.getActionView();
+        }
+
+        return true;
     }
 }

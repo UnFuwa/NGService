@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -82,11 +83,13 @@ public class AdapterListServices extends ArrayAdapter<Service> {
                     suggestions = new ArrayList<>();
 
                     //String filterPattern = constraint.toString().toLowerCase().trim().substring(0, constraint.toString().indexOf(","));
-                    String filterPattern = constraint.toString().toLowerCase();
+                    String filterPattern = constraint.toString().toLowerCase().trim();
 
                     for (Service service : tempListServices) {
                         if (service.getName().toLowerCase().contains(filterPattern)) {
                             suggestions.add(service);
+                        } else {
+                            Toast.makeText(context, "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -114,6 +117,7 @@ public class AdapterListServices extends ArrayAdapter<Service> {
                     notifyDataSetChanged();
                 } else {
                     notifyDataSetInvalidated();
+                    Toast.makeText(context, "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
                 }
             }
 

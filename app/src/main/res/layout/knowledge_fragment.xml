@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragment.specialist.CategoryKnowledgeFragment">
 
     <LinearLayout
@@ -25,26 +26,17 @@
                 android:layout_margin="10dp"
                 android:background="@drawable/custom_search_maps">
 
-                <AutoCompleteTextView
+                <androidx.appcompat.widget.SearchView
                     android:id="@+id/field_search_knowledge"
-                    android:layout_width="270dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
                     android:textSize="14sp"
                     android:textColor="@color/White"
-                    android:hint="Поиск"
-                    android:textColorHint="#B5B5B5"
-                    android:inputType="text"/>
-
-                <ImageView
-                    android:id="@+id/ic_search"
-                    android:layout_toEndOf="@id/field_search_knowledge"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/ic_search"/>
+                    android:inputType="text"
+                    app:queryHint="Поиск"
+                    app:defaultQueryHint="Поиск"
+                    android:textColorHint="#B5B5B5"/>
 
             </RelativeLayout>
 

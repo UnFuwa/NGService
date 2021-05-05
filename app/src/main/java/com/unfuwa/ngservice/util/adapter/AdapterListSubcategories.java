@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -90,7 +91,7 @@ public class AdapterListSubcategories extends ArrayAdapter<SubcategoryExtended> 
                     suggestions = new ArrayList<>();
 
                     //String filterPattern = constraint.toString().toLowerCase().trim().substring(0, constraint.toString().indexOf(","));
-                    String filterPattern = constraint.toString().toLowerCase();
+                    String filterPattern = constraint.toString().toLowerCase().trim();
 
                     for (SubcategoryExtended subcategoryExtended : tempListSubcategories) {
                         if (subcategoryExtended.getSubcategory().getName().toLowerCase().contains(filterPattern)) {
@@ -122,6 +123,7 @@ public class AdapterListSubcategories extends ArrayAdapter<SubcategoryExtended> 
                     notifyDataSetChanged();
                 } else {
                     notifyDataSetInvalidated();
+                    Toast.makeText(context, "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
                 }
             }
 
