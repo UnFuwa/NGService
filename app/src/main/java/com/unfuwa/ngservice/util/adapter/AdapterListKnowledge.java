@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.Filter;
@@ -47,13 +48,23 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
     private final StorageReference storageReference;
 
     private final Context context;
+    private static OnItemClickListener onItemClickListener;
+
     private ArrayList<KnowledgeBase> listKnowledgeBase;
     private ArrayList<KnowledgeBase> tempListKnowledgeBase;
     private ArrayList<KnowledgeBase> suggestions;
 
     private int i;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        onItemClickListener = listener;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final ImageView imagePDF;
         private final EditText themePDF;
@@ -65,6 +76,8 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
             imagePDF = itemView.findViewById(R.id.image_pdf);
             themePDF = itemView.findViewById(R.id.field_theme_pdf);
             shortDescriptionPDF = itemView.findViewById(R.id.field_short_description_pdf);
+
+            itemView.setOnClickListener(this);
         }
 
         public ImageView getImagePDF() {
@@ -78,12 +91,20 @@ public class AdapterListKnowledge extends RecyclerView.Adapter<AdapterListKnowle
         public EditText getShortDescriptionPDF() {
             return shortDescriptionPDF;
         }
+
+        @Override
+        public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                onItemClickListener.onItemClick(getAdapterPosition());
+            }
+        }
     }
 
-    public AdapterListKnowledge(Context context, ArrayList<KnowledgeBase> listKnowledgeBase, FirebaseStorage storage) {
+    public AdapterListKnowledge(Context context, ArrayList<KnowledgeBase> listKnowledgeBase, FirebaseStorage storage, OnItemClickListener onItemClickListener) {
         this.context = context;
         this.listKnowledgeBase = listKnowledgeBase;
         this.storage = storage;
+        AdapterListKnowledge.onItemClickListener = onItemClickListener;
         storageReference = storage.getReference();
     }
 

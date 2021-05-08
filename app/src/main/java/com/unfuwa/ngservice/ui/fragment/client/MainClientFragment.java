@@ -1,7 +1,9 @@
 package com.unfuwa.ngservice.ui.fragment.client;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,13 +24,14 @@ public class MainClientFragment extends Fragment {
     private TextView URLInstagramCompany;
     private TextView URLWhatsAppCompany;
 
-    private static final String ADDRESS_MAIN_CENTER = "/*ЗАГЛУШКА*/";
-    private static final String TELEPHONE = "/*ЗАГЛУШКА*/";
-    private static final String EMAIL = "/*ЗАГЛУШКА*/";
-    private static final String URL_VK = "/*ЗАГЛУШКА*/";
-    private static final String URL_INSTAGRAM = "/*ЗАГЛУШКА*/";
-    private static final String URL_WHATS_APP = "/*ЗАГЛУШКА*/";
+    private static final String ADDRESS_MAIN_CENTER = "652507, Кемеровская область, г. Ленинск-Кузнецкий, пр-т Кирова, 99";
+    private static final String TELEPHONE = "+7 (800) 555-35-35";
+    private static final String EMAIL = "<a href='ru.unfuwa.ngservice@gmail.com'>ru.unfuwa.ngservice@gmail.com</a>";
+    private static final String URL_VK = "<a href='https://vk.com/ngservice'>https://vk.com/ngservice</a>";
+    private static final String URL_INSTAGRAM = "<a href='https://www.instagram.com/ngservice'>https://www.instagram.com/ngservice</a>";
+    private static final String URL_WHATS_APP = "<a href=''>/*ОТСУТСТВУЕТ*/</a>";
 
+    @SuppressLint("SetTextI18n")
     private void initComponents() {
         addressMainCenterCompany = view.findViewById(R.id.address_main_center_company);
         telephoneCompany = view.findViewById(R.id.telephone_company);
@@ -39,10 +42,10 @@ public class MainClientFragment extends Fragment {
 
         addressMainCenterCompany.setText(addressMainCenterCompany.getText() + " " + ADDRESS_MAIN_CENTER);
         telephoneCompany.setText(telephoneCompany.getText() + " " + TELEPHONE);
-        emailCompany.setText(emailCompany.getText() + " " + EMAIL);
-        URLVKCompany.setText(URLVKCompany.getText() + " " + URL_VK);
-        URLInstagramCompany.setText(URLInstagramCompany.getText() + " " + URL_INSTAGRAM);
-        URLWhatsAppCompany.setText(URLWhatsAppCompany.getText() + " " + URL_WHATS_APP);
+        emailCompany.setText(emailCompany.getText() + " " + Html.fromHtml(EMAIL));
+        URLVKCompany.setText(URLVKCompany.getText() + " " + Html.fromHtml(URL_VK));
+        URLInstagramCompany.setText(URLInstagramCompany.getText() + " " + Html.fromHtml(URL_INSTAGRAM));
+        URLWhatsAppCompany.setText(URLWhatsAppCompany.getText() + " " + Html.fromHtml(URL_WHATS_APP));
     }
 
     @Override

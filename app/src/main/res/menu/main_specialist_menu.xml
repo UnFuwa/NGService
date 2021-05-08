@@ -22,12 +22,6 @@
             android:onClick="changeFragmentTasksWork"/>
 
         <item
-            android:id="@+id/graph_work"
-            android:title="График работы"
-            android:icon="@drawable/ic_item_graph_work"
-            android:onClick="changeFragmentGraphWork"/>
-
-        <item
             android:id="@+id/service_equipment"
             android:title="Сервис"
             android:icon="@drawable/ic_service_equipment"

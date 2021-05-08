@@ -27,8 +27,6 @@ public class VerifactionEmailDialog {
         builder.setView(view);
         builder.setCancelable(false);
 
-        buttonConfirm = view.findViewById(R.id.button_confirm);
-
         alertDialog = builder.create();
         alertDialog.show();
     }

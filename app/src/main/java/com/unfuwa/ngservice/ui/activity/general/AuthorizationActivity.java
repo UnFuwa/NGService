@@ -1,5 +1,6 @@
 package com.unfuwa.ngservice.ui.activity.general;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,8 +9,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.jakewharton.rxbinding4.widget.RxTextView;
 import com.unfuwa.ngservice.R;
 import com.unfuwa.ngservice.dao.ClientDao;
@@ -21,13 +27,17 @@ import com.unfuwa.ngservice.model.User;
 import com.unfuwa.ngservice.ui.activity.client.MainClientActivity;
 import com.unfuwa.ngservice.ui.activity.specialist.MainSpecialistActivity;
 import com.unfuwa.ngservice.ui.dialog.LoadingDialog;
+import com.unfuwa.ngservice.ui.dialog.VerifactionEmailDialog;
 import com.unfuwa.ngservice.util.database.DatabaseApi;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -40,11 +50,16 @@ public class AuthorizationActivity extends AppCompatActivity {
     private TextInputEditText fieldPassword;
     private Button buttonSignIn;
     private final LoadingDialog loadingDialog = new LoadingDialog(this);
+    private final VerifactionEmailDialog verifactionEmailDialog = new VerifactionEmailDialog(this);
+    private boolean isVerificationEmail = false;
+    private Thread threadEmailVerify;
 
     private static final String CACHE_NAME = "token.txt";
     private String CACHE_PATH;
 
     private DatabaseApi dbApi;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser firebaseUser;
 
     private Observable<Boolean> validFields;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -65,6 +80,8 @@ public class AuthorizationActivity extends AppCompatActivity {
         setContentView(R.layout.authorization_activity);
 
         initComponents();
+
+        firebaseAuth = FirebaseAuth.getInstance();
 
         CACHE_PATH = getApplicationContext().getDataDir().getPath() + "/" + CACHE_NAME;
 
@@ -142,10 +159,7 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     public void signIn(View view) {
-        String loginIn = fieldLogin.getText().toString();
-        String passwordIn = fieldPassword.getText().toString();
-
-        User userIn = new User(loginIn, passwordIn);
+        User userIn = new User(fieldLogin.getText().toString(), fieldPassword.getText().toString());
 
         UserDao userDao = dbApi.userDao();
 
@@ -154,8 +168,6 @@ public class AuthorizationActivity extends AppCompatActivity {
                 .toSingle()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
-                .doOnTerminate(loadingDialog::hideLoading)
                 .subscribe(this::startNextActivity, throwable -> showErrorMessage());
 
         compositeDisposable.add(disposable);
@@ -203,10 +215,111 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     private void startMainClientActivity(ClientUser client) {
-        Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, MainClientActivity.class);
-        intent.putExtra("client", client);
-        startActivity(intent);
+        firebaseAuth.signInWithEmailAndPassword(client.getUser().getLogin(), client.getUser().getPassword())
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        firebaseUser = task.getResult().getUser();
+
+                        if (task.isSuccessful() && firebaseUser.isEmailVerified()) {
+                            Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
+                            intent.putExtra("client", client);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Адрес электронный почты не был подтвержден, выполнена повторная отправка!", Toast.LENGTH_SHORT).show();
+
+                            firebaseUser.sendEmailVerification()
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            Disposable disposable = Flowable.just(task1)
+                                                    .subscribeOn(Schedulers.io())
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .doOnSubscribe(subscription -> verifactionEmailDialog.showVerification())
+                                                    .subscribe(this::verificationEmail, Throwable::printStackTrace);
+
+                                            compositeDisposable.add(disposable);
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Невалидный адрес)", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    }
+
+                    public void verificationEmail(Task<Void> voidTask) {
+                        AtomicBoolean flag = new AtomicBoolean(true);
+                        firebaseUser = firebaseAuth.getCurrentUser();
+                        firebaseUser.reload();
+
+                        try {
+                            threadEmailVerify = new Thread(()->{
+                                while(flag.get()) {
+                                    firebaseUser.reload();
+
+                                    if (firebaseUser.isEmailVerified()) {
+                                        flag.set(false);
+                                        isVerificationEmail = true;
+                                    } else {
+                                        flag.set(true);
+                                    }
+
+                                    try {
+                                        Thread.sleep(3000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+
+                            threadEmailVerify.start();
+                            threadEmailVerify.join();
+
+                            if (isVerificationEmail) {
+                                startNextActivity();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    public void startNextActivity() {
+                        if (isVerificationEmail) {
+                            verifactionEmailDialog.hideVerification();
+
+                            Toast.makeText(getApplicationContext(), "Адрес электронной почты был подтвержден!", Toast.LENGTH_SHORT).show();
+
+                            File file = new File(CACHE_PATH);
+
+                            try {
+                                if (file.exists()) {
+                                    file.delete();
+                                }
+
+                                file.createNewFile();
+
+                                FileWriter writeFile = new FileWriter(file);
+
+                                writeFile.append(client.getUser().getToken() + System.lineSeparator());
+
+                                writeFile.close();
+
+                                startMainClientActivity(client);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Адрес электронной почты был не подтвержден!", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                    private void startMainClientActivity(ClientUser client) {
+                        Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
+                        intent.putExtra("client", client);
+                        startActivity(intent);
+                    }
+                });
     }
 
     private void startMainSpecialistActivity(SpecialistUser specialist) {

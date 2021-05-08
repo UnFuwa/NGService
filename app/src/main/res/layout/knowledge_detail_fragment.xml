@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.fragment.specialist.KnowledgeDetailFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:drawable/dialog_holo_light_frame"
+            android:descendantFocusability="blocksDescendants"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/image_knowledge_base"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginBottom="5dp"
+                android:src="@mipmap/ic_launcher"
+                tools:ignore="ContentDescription"
+                android:cropToPadding="true"
+                android:padding="4dp"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:background="@drawable/border_item_list_tasks_today"/>
+
+            <TextView
+                android:id="@+id/id_knowledge_base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:gravity="center_horizontal|center_vertical"
+                android:layout_marginBottom="5dp"
+                android:text="ID:"
+                android:textStyle="bold|italic"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="14sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:background="@drawable/border_item_list_tasks_today"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/category_knowledge_base"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:paddingStart="10dp"
+                    android:text="Категория:"
+                    android:maxLines="3"
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:background="@drawable/border_item_list_tasks_today"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/subcategory_knowledge_base"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:paddingStart="10dp"
+                    android:text="Подкатегория:"
+                    android:maxLines="3"
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:background="@drawable/border_item_list_tasks_today"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/theme_knowledge_base"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:paddingStart="10dp"
+                    android:text="Тема:"
+                    android:maxLines="5"
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:background="@drawable/border_item_list_tasks_today"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="Полное описание"
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkGreenCyan"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"/>
+
+                <EditText
+                    android:id="@+id/field_full_description_knowledge_base"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:paddingStart="5dp"
+                    android:lines="15"
+                    android:text="Значение"
+                    android:gravity="start"
+                    android:inputType="none"
+                    android:textColor="@color/DarkBlack"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:textSize="10sp"
+                    android:autofillHints=""/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp">
+
+                <Button
+                    android:id="@+id/button_download_full_content"
+                    android:onClick="downloadFullContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/signin_button"
+                    android:fontFamily="@font/aqum"
+                    android:text="Скачать файл"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:textAllCaps="false"
+                    android:textColor="#174A42"
+                    android:textSize="12sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</FrameLayout>

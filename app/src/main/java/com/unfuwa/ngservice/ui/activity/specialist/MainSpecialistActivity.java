@@ -1,5 +1,6 @@
 package com.unfuwa.ngservice.ui.activity.specialist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -13,13 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -30,6 +37,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.storage.FirebaseStorage;
@@ -65,6 +74,7 @@ import com.unfuwa.ngservice.ui.fragment.specialist.AddEquipmentFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.EquipmentDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.GraphWorkFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.CategoryKnowledgeFragment;
+import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeDetailFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.KnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.SubcategoryKnowledgeFragment;
 import com.unfuwa.ngservice.ui.fragment.specialist.MainSpecialistFragment;
@@ -133,6 +143,12 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private SearchView fieldSearchKnowledge;
     private FirebaseStorage storage;
     private StorageReference storageReference;
+    private ImageView imageKnowledgeBase;
+    private TextView idKnowledgeBase;
+    private TextView categoryKnowledgeBase;
+    private TextView subcategoryKnowledgeBase;
+    private TextView themeKnowledgeBase;
+    private EditText fieldFullDescriptionKnowledgeBase;
 
     private TextView idTaskWork;
     private EditText titleTaskWork;
@@ -214,6 +230,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private CategoryKnowledgeFragment categoryKnowledgeFragment;
     private SubcategoryKnowledgeFragment subcategoryKnowledgeFragment;
     private KnowledgeFragment knowledgeFragment;
+    private KnowledgeDetailFragment knowledgeDetailFragment;
     private TasksWorkFragment tasksWorkFragment;
     private TaskWorkDetailFragment taskWorkDetailFragment;
     private GraphWorkFragment graphWorkFragment;
@@ -267,6 +284,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         categoryKnowledgeFragment = new CategoryKnowledgeFragment();
         subcategoryKnowledgeFragment = new SubcategoryKnowledgeFragment();
         knowledgeFragment = new KnowledgeFragment();
+        knowledgeDetailFragment = new KnowledgeDetailFragment();
         tasksWorkFragment = new TasksWorkFragment();
         taskWorkDetailFragment = new TaskWorkDetailFragment();
         graphWorkFragment = new GraphWorkFragment();
@@ -289,6 +307,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, categoryKnowledgeFragment, "CategoryKnowledge")
                 .add(R.id.fragment_container, subcategoryKnowledgeFragment, "SubcategoryKnowledge")
                 .add(R.id.fragment_container, knowledgeFragment, "Knowledge")
+                .add(R.id.fragment_container, knowledgeDetailFragment, "KnowledgeDetail")
                 .add(R.id.fragment_container, tasksWorkFragment, "TasksWork")
                 .add(R.id.fragment_container, taskWorkDetailFragment, "TaskWorkDetail")
                 .add(R.id.fragment_container, graphWorkFragment, "GraphWork")
@@ -300,6 +319,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .hide(categoryKnowledgeFragment)
                 .hide(subcategoryKnowledgeFragment)
                 .hide(knowledgeFragment)
+                .hide(knowledgeDetailFragment)
                 .hide(tasksWorkFragment)
                 .hide(taskWorkDetailFragment)
                 .hide(graphWorkFragment)
@@ -1278,7 +1298,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         fieldSearchSubcategories = findViewById(R.id.field_search_subcategories);
         listViewSubcategories = findViewById(R.id.list_subcategories);
-        listViewSubcategories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listViewSubcategories.setOnItemClickListener(new AdapterView.OnItemClickListener()  {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 KnowledgeBaseDao knowledgeBaseDao = dbApi.knowledgeBaseDao();
@@ -1295,6 +1315,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 activeFragment = knowledgeFragment;
 
                 storage = FirebaseStorage.getInstance();
+                storageReference = storage.getReference();
 
                 recyclerViewKnowledgeBase = knowledgeFragment.getView().findViewById(R.id.recycler_view_knowledge);
                 fieldSearchKnowledge = findViewById(R.id.field_search_knowledge);
@@ -1318,43 +1339,93 @@ public class MainSpecialistActivity extends AppCompatActivity {
             private void createListKnowledgeBase(List<KnowledgeBase> list) {
                 listKnowledgeBase = new ArrayList<>(list);
 
-                adapterListKnowledge = new AdapterListKnowledge(getApplicationContext(), listKnowledgeBase, storage);
+                adapterListKnowledge = new AdapterListKnowledge(getApplicationContext(), listKnowledgeBase, storage, new AdapterListKnowledge.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(int position) {
+                        adapterListKnowledge.notifyItemChanged(position);
+
+                        knowledgeBase = listKnowledgeBase.get(position);
+
+                        drawerLayout.closeDrawer(GravityCompat.START);
+
+                        fragmentManager.beginTransaction()
+                                .hide(activeFragment)
+                                .show(knowledgeDetailFragment)
+                                .commit();
+
+                        activeFragment = knowledgeDetailFragment;
+
+                        imageKnowledgeBase = findViewById(R.id.image_knowledge_base);
+                        idKnowledgeBase = findViewById(R.id.id_knowledge_base);
+                        categoryKnowledgeBase = findViewById(R.id.category_knowledge_base);
+                        subcategoryKnowledgeBase = findViewById(R.id.subcategory_knowledge_base);
+                        themeKnowledgeBase = findViewById(R.id.theme_knowledge_base);
+                        fieldFullDescriptionKnowledgeBase = findViewById(R.id.field_full_description_knowledge_base);
+
+                        Disposable disposable = Flowable.just(knowledgeBase)
+                                .doOnNext(knowledgeBase -> {
+                                    StorageReference requestRef = storageReference.child("full_content_knowledgebase/image/" + knowledgeBase.getURLImage());
+
+                                    requestRef.getBytes(1024*1024)
+                                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                                @Override
+                                                public void onSuccess(byte [] bytes) {
+                                                    //progressDialog.dismiss();
+                                                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                                    imageKnowledgeBase.setImageBitmap(bitmap);
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    //progressDialog.dismiss();
+                                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во время загрузки обложки!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                })
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::showMessageSuccessRequest, Throwable::printStackTrace);
+
+                        compositeDisposable.add(disposable);
+
+                        idKnowledgeBase.setText("ID: " + Integer.toString(knowledgeBase.getId()));
+                        categoryKnowledgeBase.setText("Категория: " + category.getName());
+                        subcategoryKnowledgeBase.setText("Подкатегория: " + knowledgeBase.getNameSubcategory());
+                        themeKnowledgeBase.setText("Тема: " + knowledgeBase.getTheme());
+                        fieldFullDescriptionKnowledgeBase.setText(knowledgeBase.getFullDescription());
+                    }
+
+                    private void showMessageSuccessRequest(KnowledgeBase knowledgeBase) {
+                        Toast.makeText(getApplicationContext(), "Обложка успешно загружена!", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 recyclerViewKnowledgeBase.setAdapter(adapterListKnowledge);
                 recyclerViewKnowledgeBase.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                recyclerViewKnowledgeBase.setHasFixedSize(true);
                 fieldSearchKnowledge.setQueryHint("Поиск");
                 fieldSearchKnowledge.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String query) {
-                        Disposable disposable = Completable.fromAction(new Action() {
-                            @Override
-                            public void run() throws Throwable {
-                                adapterListKnowledge.getFilter().filter(query);
-                            }
-                        })
-                                .delay(5000, TimeUnit.MILLISECONDS)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(this::showMessageCompleteSearch, this::showMessageErrorSearch);
-
-                        compositeDisposable.add(disposable);
-
-                        return true;
+                        return false;
                     }
 
                     @Override
                     public boolean onQueryTextChange(String newText) {
-                        Disposable disposable = Completable.fromAction(new Action() {
-                                @Override
-                                public void run() throws Throwable {
-                                    adapterListKnowledge.getFilter().filter(newText);
-                                }
-                            })
-                                .delay(5000, TimeUnit.MILLISECONDS)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(this::showMessageCompleteSearch, this::showMessageErrorSearch);
+                        //Disposable disposable = Completable.fromAction(new Action() {
+                                //@Override
+                                //public void run() throws Throwable {
+                                    //adapterListKnowledge.getFilter().filter(newText);
+                                //}
+                            //})
+                                //.delay(5000, TimeUnit.MILLISECONDS)
+                                //.subscribeOn(Schedulers.io())
+                                //.observeOn(AndroidSchedulers.mainThread())
+                                //.subscribe(this::showMessageCompleteSearch, this::showMessageErrorSearch);
 
-                        compositeDisposable.add(disposable);
+                        //compositeDisposable.add(disposable);
+
+                        adapterListKnowledge.getFilter().filter(newText);
 
                         return true;
                     }
@@ -1407,14 +1478,46 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка подкатегорий!", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.action_search);
+    public void openFullContent(View view) {
+    }
 
-        if (fieldSearchKnowledge != null) {
-            fieldSearchKnowledge = (SearchView) item.getActionView();
-        }
+    public void downloadFullContent(View view) {
+        Disposable disposable = Flowable.just(knowledgeBase)
+                .doOnNext(knowledgeBase -> {
+                    StorageReference requestRef = storageReference.child("full_content_knowledgebase/pdf/" + knowledgeBase.getURL());
 
-        return true;
+                    requestRef.getDownloadUrl()
+                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    //progressDialog.dismiss();
+                                    DownloadManager downloadManager = (DownloadManager) getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                                    Uri uriDownload = Uri.parse(uri.toString());
+                                    DownloadManager.Request request = new DownloadManager.Request(uriDownload);
+
+                                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                    request.setDestinationInExternalFilesDir(getApplicationContext(), Environment.DIRECTORY_DOWNLOADS, knowledgeBase.getURL());
+
+                                    downloadManager.enqueue(request);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    //progressDialog.dismiss();
+                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showMessageSuccessDownload, Throwable::printStackTrace);
+
+        compositeDisposable.add(disposable);
+
+    }
+
+    private void showMessageSuccessDownload(KnowledgeBase knowledgeBase) {
+        Toast.makeText(getApplicationContext(), "Успешно окончено скачивание файла " + knowledgeBase.getURL() + "!", Toast.LENGTH_SHORT).show();
     }
 }
