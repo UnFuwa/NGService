@@ -101,7 +101,7 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
         Disposable disposable = filialCityDao.getListFilials()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::addServiceCenters, Throwable::printStackTrace);
+                .subscribe(this::addServiceCenters, throwable -> showErrorMessage());
     }
 
     private void addServiceCenters(List<FilialCity> listAllItems) {
@@ -118,24 +118,28 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
                 .fillColor(R.color.DarkGreenCyan));
 
         try {
-            for (FilialCity filialCity : listFilials) {
-                list = geocoder.getFromLocationName(
-                        filialCity.getCity().get(0).getNameRegion()
-                        + "," + filialCity.getFilial().getNameCity()
-                        + "," + filialCity.getFilial().getNameStreet(), 1);
+            if (listFilials.size() != 0) {
+                for (FilialCity filialCity : listFilials) {
+                    list = geocoder.getFromLocationName(
+                            filialCity.getCity().get(0).getNameRegion()
+                                    + "," + filialCity.getFilial().getNameCity()
+                                    + "," + filialCity.getFilial().getNameStreet(), 1);
 
-                Address address = list.get(0);
-                LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+                    Address address = list.get(0);
+                    LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
 
-                double x0 = myLocation.latitude;
-                double y0 = myLocation.longitude;
-                double x = address.getLatitude();
-                double y = address.getLongitude();
-                double r = circle.getRadius();
+                    double x0 = myLocation.latitude;
+                    double y0 = myLocation.longitude;
+                    double x = address.getLatitude();
+                    double y = address.getLongitude();
+                    double r = circle.getRadius();
 
-                if ((Math.pow((x - x0), 2) + Math.pow((y - y0), 2)) <= (Math.pow(r, 2))) {
-                    listMarkersNearNearbyFilials.add(googleMap.addMarker(new MarkerOptions().position(location).title(address.getAddressLine(0))));
+                    if ((Math.pow((x - x0), 2) + Math.pow((y - y0), 2)) <= (Math.pow(r, 2))) {
+                        listMarkersNearNearbyFilials.add(googleMap.addMarker(new MarkerOptions().position(location).title(address.getAddressLine(0))));
+                    }
                 }
+            } else {
+                Toast.makeText(context, "Получен пустой список сервисных центров!", Toast.LENGTH_SHORT).show();
             }
         } catch (IOException e) {
             e.printStackTrace();

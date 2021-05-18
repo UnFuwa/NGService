@@ -433,7 +433,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     private void showMessageErrorStatusRepair() {
-        Toast.makeText(getApplicationContext(), "Возникла ошибка во время определения статуса ремонта оборудования!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Возникла ошибка во время определения статуса ремонта оборудования! (Идентификатор не существует)", Toast.LENGTH_SHORT).show();
     }
 
     public void changeFragmentRequest(MenuItem item) {
@@ -491,10 +491,14 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     public void addItemListPhoto(View view) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, IMAGE_REQUEST_CODE);
+        if (listPhotos.size() < 4) {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent, IMAGE_REQUEST_CODE);
+        } else {
+            Toast.makeText(getApplicationContext(), "Вы уже добавили 4 фотографии!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void deleteItemListPhoto(View view) {
@@ -573,7 +577,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                 fieldDateArrive.getText().toString(),
                 formatDate);
 
-        if (listPhotos.isEmpty()) {
+        if (listPhotos.size() == 0) {
             Disposable disposable = requestDao.insert(request)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -582,7 +586,8 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                     .subscribe(this::showMessageSuccessRequest, Throwable::printStackTrace);
 
             compositeDisposable.add(disposable);
-        } else if (!listPhotos.isEmpty()) {
+        } else {
+            listPhotos.size();
             Disposable disposable = requestDao.insert(request)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -724,6 +729,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void selectDate(View view) {
         Calendar calendar = Calendar.getInstance();
 
@@ -738,13 +744,13 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
         dateSetListener = (view1, year1, month1, dayOfMonth) -> {
             if (dayOfMonth < 10 && month1 < 10) {
-                fieldDateArrive.setText("0" + dayOfMonth + "." + "0" + month1 + "." + year1);
+                fieldDateArrive.setText("0" + Integer.toString(dayOfMonth) + "." + "0" + Integer.toString(month1 + 1) + "." + Integer.toString(year1));
             } else if (dayOfMonth < 10) {
-                fieldDateArrive.setText("0" + dayOfMonth + "." + month1 + "." + year1);
+                fieldDateArrive.setText("0" + Integer.toString(dayOfMonth) + "." + Integer.toString(month1 + 1) + "." + Integer.toString(year1));
             } else if (month1 < 10) {
-                fieldDateArrive.setText(dayOfMonth + "." + "0" + month1 + "." + year1);
+                fieldDateArrive.setText(Integer.toString(dayOfMonth) + "." + "0" + Integer.toString(month1 + 1) + "." + Integer.toString(year1));
             } else {
-                fieldDateArrive.setText(dayOfMonth + "." + month1 + "." + year1);
+                fieldDateArrive.setText(Integer.toString(dayOfMonth) + "." + Integer.toString(month1 + 1) + "." + Integer.toString(year1));
             }
         };
     }
@@ -805,6 +811,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Возникла ошибка при определении местоположения! (Нечего не найдено)", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -895,6 +902,9 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     private void addRegService(List<RegServiceExtended> regServicesExtended) {
+        sumPrice = 0.0;
+        countServices = 0;
+
         ArrayList<Double> listPrices = new ArrayList<>();
 
         //AtomicReference<Double> sumPrice = new AtomicReference<>(0.0);
@@ -914,7 +924,11 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         adapterListRegService = new AdapterListRegService(getApplicationContext(), R.layout.list_reg_services, listServices);
         listViewRegService.setAdapter(adapterListRegService);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+        if (listServices.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список оказанных услуг пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -926,6 +940,8 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             labelSumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
 
             Toast.makeText(getApplicationContext(), "Успешно вычислена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
+        } else {
+            labelSumPriceRegService.setText("ИТОГО: 0 руб.");
         }
     }
 

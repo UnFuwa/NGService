@@ -187,6 +187,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private AutoCompleteTextView fieldAddService;
     private ImageView iconDownListServices;
     private EditText fieldDescriptionAddService;
+    private Button buttonAddService;
     private ArrayList<Service> listServices;
     private ArrayList<RegServiceExtended> listRegServices;
     private AdapterListServices adapterListServices;
@@ -197,6 +198,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private int countServices = 0;
     private Service service;
     private RegService regService;
+
+    private boolean isValidAddService;
+    private boolean isValidDescriptionService;
 
     private ArrayList<String> listTypesEquipment;
     private EditText fieldEmailClient;
@@ -495,7 +499,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         adapterListTasksWorkToday = new AdapterListTasksWorkToday(getApplicationContext(), R.layout.list_tasks_work_today, listTasksWorkToday);
         listViewTasksWorkToday.setAdapter(adapterListTasksWorkToday);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список рабочих задач на сегодня!", Toast.LENGTH_SHORT).show();
+        if (listTasksWorkToday.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список рабочих задач на сегодня!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список рабочих задач на сегодня пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showMessageErrorTasksWorkToday() {
@@ -504,31 +512,35 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     public void getTaskDetails(View view) {
-        drawerLayout.closeDrawer(GravityCompat.START);
+        if (taskWork != null) {
+            drawerLayout.closeDrawer(GravityCompat.START);
 
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(taskWorkDetailFragment)
-                .commit();
+            fragmentManager.beginTransaction()
+                    .hide(activeFragment)
+                    .show(taskWorkDetailFragment)
+                    .commit();
 
-        activeFragment = taskWorkDetailFragment;
+            activeFragment = taskWorkDetailFragment;
 
-        nameFragment.setText("Подробнее об задаче");
-        nameFragment.setTextSize(18);
+            nameFragment.setText("Подробнее об задаче");
+            nameFragment.setTextSize(18);
 
-        idTaskWork = findViewById(R.id.id_task_work);
-        titleTaskWork = findViewById(R.id.field_title_task_work);
-        dateFromTaskWork = findViewById(R.id.field_date_from);
-        dateToTaskWork = findViewById(R.id.field_date_to);
-        difficultTaskWork = findViewById(R.id.field_difficult_task_work);
-        fullDescriptionTaskWork = findViewById(R.id.field_full_description_task_work);
+            idTaskWork = findViewById(R.id.id_task_work);
+            titleTaskWork = findViewById(R.id.field_title_task_work);
+            dateFromTaskWork = findViewById(R.id.field_date_from);
+            dateToTaskWork = findViewById(R.id.field_date_to);
+            difficultTaskWork = findViewById(R.id.field_difficult_task_work);
+            fullDescriptionTaskWork = findViewById(R.id.field_full_description_task_work);
 
-        idTaskWork.setText("Задача № " + Integer.toString(taskWork.getId()));
-        titleTaskWork.setText(taskWork.getTitle());
-        dateFromTaskWork.setText(taskWork.getDateFrom().toString());
-        dateToTaskWork.setText(taskWork.getDateTo().toString());
-        difficultTaskWork.setText(taskWork.getDifficult());
-        fullDescriptionTaskWork.setText(taskWork.getFullDescription());
+            idTaskWork.setText("Задача № " + Integer.toString(taskWork.getId()));
+            titleTaskWork.setText(taskWork.getTitle());
+            dateFromTaskWork.setText(taskWork.getDateFrom().toString());
+            dateToTaskWork.setText(taskWork.getDateTo().toString());
+            difficultTaskWork.setText(taskWork.getDifficult());
+            fullDescriptionTaskWork.setText(taskWork.getFullDescription());
+        } else {
+            Toast.makeText(getApplicationContext(), "Вы не выбрали задачу из списка!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void setStatusCompleteTaskWork(View view) {
@@ -634,7 +646,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         adapterListTasksWork = new AdapterListTasksWork(getApplicationContext(), R.layout.list_tasks_work, listTasksWork);
         listViewTasksWork.setAdapter(adapterListTasksWork);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список рабочих задач!", Toast.LENGTH_SHORT).show();
+        if (listTasksWork.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список рабочих задач!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список рабочих задач пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showMessageErrorListTasksWork() {
@@ -743,7 +759,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 nameFragment.setText("Подробнее об оборудовании");
                 nameFragment.setTextSize(13);
 
-                idEquipmentDetail = findViewById(R.id.id_equipment_detail);
+                idEquipmentDetail = equipmentDetailFragment.getView().findViewById(R.id.id_equipment_detail);
                 fieldEmailClientDetail = findViewById(R.id.field_email_client_detail);
                 fieldTypeEquipmentDetail = findViewById(R.id.field_type_equipment_detail);
                 fieldNameEquipmentDetail = findViewById(R.id.field_name_equipment_detail);
@@ -788,6 +804,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 if (descriptionProblemEquipmentField.isEmpty()) {
                     fieldDescriptionProblemDetail.setError("Вы не ввели значение описания проблемы!");
                     isValidDescriptionProblemDetail = false;
+                } else if (descriptionProblemEquipmentField.length() > 400) {
+                    fieldDescriptionProblem.setError("Количество символов превышает отметку в 400 знаков!");
+                    isValidDescriptionProblem = false;
                 } else {
                     isValidDescriptionProblemDetail = true;
                 }
@@ -922,7 +941,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
         iconDownListServices = findViewById(R.id.ic_down_list_services);
         fieldDescriptionAddService = findViewById(R.id.field_description_add_service);
         listViewRegService = findViewById(R.id.list_reg_service_equipment);
-        sumPriceRegService = findViewById(R.id.sum_price_reg_service_equipment);
+        sumPriceRegService = regServiceEquipmentFragment.getView().findViewById(R.id.sum_price_reg_service_equipment);
+        buttonAddService = findViewById(R.id.button_add_item_list_reg_service);
 
         fieldIdEquipmentAddService.setText(Integer.toString(equipmentClient.getEquipment().getId()));
 
@@ -936,8 +956,54 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::createListServices, throwable -> showMessageErrorListServices());
 
+        Observable<String> addServiceField = RxTextView.textChanges(fieldAddService)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Observable<String> descriptionAddServiceField = RxTextView.textChanges(fieldDescriptionAddService)
+                .skip(1)
+                .map(CharSequence::toString)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .distinctUntilChanged();
+
+        Disposable disposable2 = Observable.combineLatest(addServiceField, descriptionAddServiceField, this::isValidationFieldsAddService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledAddService);
+
         compositeDisposable.add(disposable);
         compositeDisposable.add(disposable1);
+        compositeDisposable.add(disposable2);
+    }
+
+    private void enabledAddService(boolean validFields) {
+        if (validFields) {
+            buttonAddService.setEnabled(true);
+        } else {
+            buttonAddService.setEnabled(false);
+        }
+    }
+
+    private boolean isValidationFieldsAddService(String addServiceField, String descriptionAddServiceField) {
+        if (addServiceField.isEmpty()) {
+            fieldAddService.setError("Вы не выбрали услугу!");
+            isValidAddService = false;
+        } else {
+            isValidAddService = true;
+        }
+
+        if (descriptionAddServiceField.length() > 400) {
+            fieldDescriptionAddService.setError("Количество символов превышает отметку в 400 знаков!");
+            isValidDescriptionService = false;
+        } else {
+            isValidDescriptionService = true;
+        }
+
+        return isValidAddService && isValidDescriptionService;
     }
 
     private void createListServices(List<Service> list) {
@@ -946,7 +1012,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         adapterListServices = new AdapterListServices(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, listServices);
         fieldAddService.setAdapter(adapterListServices);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список услуг!", Toast.LENGTH_SHORT).show();
+        if (listServices.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список услуг!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Cписок услуг пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showMessageErrorListServices() {
@@ -958,6 +1028,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     private void addRegService(List<RegServiceExtended> regServicesExtended) {
+        sumPrice = 0.0;
+        countServices = 0;
+
         ArrayList<Double> listPrices = new ArrayList<>();
 
         listRegServices = new ArrayList<>(regServicesExtended);
@@ -976,7 +1049,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         adapterListRegServices = new AdapterListRegService(getApplicationContext(), R.layout.list_reg_services, listRegServices);
         listViewRegService.setAdapter(adapterListRegServices);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+        if (listRegServices.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список оказанных услуг!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список оказанных услуг пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -1025,7 +1102,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                             specialist.getSpecialist().getLogin(),
                             service.getName(),
                             null))
-                    .subscribeOn(Schedulers.computation())
+                    .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::addService, throwable -> showMessageErrorAddRegService());
 
@@ -1037,9 +1114,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private void addService() {
         listRegServices.add(new RegServiceExtended(regService, service));
 
-        sumPrice += service.getPrice();
+        //sumPrice += service.getPrice();
 
-        sumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
+        //sumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
 
         Toast.makeText(getApplicationContext(), "Успешно обновлена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();
 
@@ -1149,7 +1226,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterTypesEquipment = new ArrayAdapter<>(getApplicationContext(), R.layout.list_subcategories_autocomplete, listTypesEquipment);
         fieldTypeEquipment.setAdapter(adapterTypesEquipment);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список типов оборудования!", Toast.LENGTH_SHORT).show();
+        if (listTypesEquipment.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список типов оборудования!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список типов оборудования пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void showListTypesEquipment(View view) {
@@ -1178,7 +1259,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
         } else if (!emailClientField.contains("@")) {
             fieldEmailClient.setError("Вы ввели неверное значение эл.почты! Отсутствует '@'.");
             isValidEmailClient = false;
-        } else if (emailClientField.length() < 4) {
+        } else if (emailClientField.substring(emailClientField.indexOf("@"), emailClientField.length() - 1).length() < 1) {
+            fieldEmailClient.setError("Вы не ввели домен почты!");
+            isValidEmailClient = false;
+        } else if (emailClientField.substring(0, emailClientField.indexOf("@")).length() < 4) {
             fieldEmailClient.setError("Имя почтового ящика должно состоять из 4 или более символов!");
             isValidEmailClient = false;
         } else if (emailClientField.length() > 45) {
@@ -1196,7 +1280,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
 
         if (nameEquipmentField.isEmpty()) {
-            fieldNameEquipment.setError("Вы не ввели значение наименование оборудования!");
+            fieldNameEquipment.setError("Вы не ввели значение наименования оборудования!");
+            isValidNameEquipment = false;
+        } else if (nameEquipmentField.length() > 200) {
+            fieldNameEquipment.setError("Наименование оборудования не должно превышать 200 символов!");
             isValidNameEquipment = false;
         } else {
             isValidNameEquipment = true;
@@ -1211,6 +1298,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         if (descriptionProblemField.isEmpty()) {
             fieldDescriptionProblem.setError("Вы не ввели значение описания проблемы!");
+            isValidDescriptionProblem = false;
+        } else if (descriptionProblemField.length() > 400) {
+            fieldDescriptionProblem.setError("Количество символов превышает отметку в 400 знаков!");
             isValidDescriptionProblem = false;
         } else {
             isValidDescriptionProblem = true;
@@ -1438,8 +1528,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "По результатам поиска нечего не найдено!", Toast.LENGTH_SHORT).show();
                     }
                 });
-
-                Toast.makeText(getApplicationContext(), "Успешно сформирован список справочных материалов по подкатегории " + subcategory.getName() + "!", Toast.LENGTH_SHORT).show();
+                if (listKnowledgeBase.size() != 0) {
+                    Toast.makeText(getApplicationContext(), "Успешно сформирован список справочных материалов по подкатегории " + subcategory.getName() + "!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Список справочных материалов по подкатегории " + subcategory.getName() + " пуст!", Toast.LENGTH_SHORT).show();
+                }
             }
 
             private void showMessageErrorListKnowledgeBase() {
@@ -1471,14 +1564,15 @@ public class MainSpecialistActivity extends AppCompatActivity {
         fieldSearchSubcategories.setAdapter(adapterListSubcategories);
         listViewSubcategories.setAdapter(adapterListSubcategories);
 
-        Toast.makeText(getApplicationContext(), "Успешно сформирован список подкатегорий!", Toast.LENGTH_SHORT).show();
+        if (listSubcategories.size() != 0) {
+            Toast.makeText(getApplicationContext(), "Успешно сформирован список подкатегорий!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Список подкатегорий пуст!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showMessageErrorListSubcategories() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при формировании списка подкатегорий!", Toast.LENGTH_SHORT).show();
-    }
-
-    public void openFullContent(View view) {
     }
 
     public void downloadFullContent(View view) {
@@ -1505,7 +1599,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     //progressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла! (Отсутствие подключения к Интернету)", Toast.LENGTH_SHORT).show();
                                 }
                             });
                 })
