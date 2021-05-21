@@ -26,6 +26,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -841,14 +842,18 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     public void selectLocation(View view) {
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(requestFragment)
-                .commit();
+        if (address.getAddressLine(0) != null) {
+            fragmentManager.beginTransaction()
+                    .hide(activeFragment)
+                    .show(requestFragment)
+                    .commit();
 
-        fieldAddress.setText(address.getAddressLine(0));
+            fieldAddress.setText(address.getAddressLine(0));
 
-        activeFragment = googleMapsFragment;
+            activeFragment = googleMapsFragment;
+        } else {
+            Toast.makeText(getApplicationContext(), "Вы не выбрали местоположение на карте!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void startAutoCompletePlace(View view) {
@@ -869,11 +874,12 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         }
 
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 place = Autocomplete.getPlaceFromIntent(data);
                 fieldSearch.setText(place.getAddress());
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
+                Log.d("TAG", status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
 
             }
