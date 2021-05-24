@@ -6,123 +6,65 @@
     android:layout_margin="20dp"
     tools:context=".ui.fragment.client.StatusRepairFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="start"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginBottom="10dp"
-            android:text="Статус"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="330dp"
-            android:padding="10dp"
-            android:orientation="vertical"
-            android:background="@drawable/custom_block_fragment">
-
-            <ImageView
-                android:id="@+id/icon_status_repair"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:src="@drawable/ic_status_repair_is_wait"
-                android:background="@drawable/custom_image_status"
-                android:layout_gravity="center_horizontal"
-                tools:ignore="ContentDescription"
-                android:layout_marginBottom="20dp"
-                android:scaleType="centerCrop"/>
-
-            <TextView
-                android:id="@+id/output_status_repair"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="Ожидание ввода идентификатора..."
-                android:textStyle="bold|italic"
-                android:textColor="@color/DarkBlack"
-                android:textAllCaps="false"
-                android:textSize="16sp"/>
-
-            <EditText
-                android:id="@+id/field_id_equipment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Идентификатор оборудования*"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="number"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_id_equipment"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="20dp"
-                android:autofillHints=""/>
-
-            <Button
-                android:id="@+id/button_update_status_repair"
-                android:onClick="getStatusRepairEquipment"
-                android:enabled="false"
-                android:layout_width="170dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/signin_button"
-                android:fontFamily="@font/aqum"
-                android:text="Обновить статус"
-                android:layout_gravity="right"
-                android:textAllCaps="false"
-                android:textColor="#174A42"
-                android:textSize="12sp"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="10dp"
-            android:text="Параметры оборудования"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
-
-        <ScrollView
+    <ScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="start"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginBottom="10dp"
+                android:text="Статус"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="20sp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="330dp"
                 android:padding="10dp"
                 android:orientation="vertical"
                 android:background="@drawable/custom_block_fragment">
 
-                <EditText
-                    android:id="@+id/field_name_equipment"
+                <ImageView
+                    android:id="@+id/icon_status_repair"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/ic_status_repair_is_wait"
+                    android:background="@drawable/custom_image_status"
+                    android:layout_gravity="center_horizontal"
+                    tools:ignore="ContentDescription"
+                    android:layout_marginBottom="20dp"
+                    android:scaleType="centerCrop"/>
+
+                <TextView
+                    android:id="@+id/output_status_repair"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Наименование оборудования"
-                    android:editable="false"
+                    android:gravity="center_horizontal"
+                    android:text="Ожидание ввода идентификатора..."
+                    android:textStyle="bold|italic"
+                    android:textColor="@color/DarkBlack"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"/>
+
+                <EditText
+                    android:id="@+id/field_id_equipment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Идентификатор оборудования*"
                     android:ems="10"
                     android:textColorHint="#B5B5B5"
-                    android:inputType="none"
+                    android:inputType="number"
                     android:background="@drawable/input_field"
                     android:textColor="@color/White"
                     android:textAllCaps="false"
@@ -131,67 +73,21 @@
                     android:paddingBottom="5dp"
                     android:textSize="14sp"
                     android:drawablePadding="13dp"
-                    android:drawableStart="@drawable/ic_name_equipment"
+                    android:drawableStart="@drawable/ic_id_equipment"
                     android:layout_marginTop="15dp"
                     android:layout_marginBottom="20dp"
-                    android:autofillHints="" />
-
-                <EditText
-                    android:id="@+id/field_type_equipment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Тип оборудования"
-                    android:editable="false"
-                    android:ems="10"
-                    android:textColorHint="#B5B5B5"
-                    android:inputType="none"
-                    android:background="@drawable/input_field"
-                    android:textColor="@color/White"
-                    android:textAllCaps="false"
-                    android:paddingStart="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:textSize="14sp"
-                    android:drawablePadding="13dp"
-                    android:drawableStart="@drawable/ic_type_equipment"
-                    android:layout_marginBottom="20dp"
-                    android:autofillHints="" />
-
-                <EditText
-                    android:id="@+id/field_description_status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Описание проблемы"
-                    android:editable="false"
-                    android:ems="10"
-                    android:textColorHint="#B5B5B5"
-                    android:inputType="none"
-                    android:minLines="8"
-                    android:maxLines="12"
-                    android:scrollbars="vertical"
-                    android:gravity="top|left"
-                    android:background="@drawable/input_field"
-                    android:textColor="@color/White"
-                    android:textAllCaps="false"
-                    android:paddingStart="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp"
-                    android:textSize="14sp"
-                    android:drawablePadding="13dp"
-                    android:drawableStart="@drawable/ic_description"
-                    android:layout_marginBottom="20dp"
-                    android:autofillHints="" />
+                    android:autofillHints=""/>
 
                 <Button
-                    android:id="@+id/button_list_regservice"
-                    android:onClick="getListRegServiceByEquipment"
+                    android:id="@+id/button_update_status_repair"
+                    android:onClick="getStatusRepairEquipment"
                     android:enabled="false"
-                    android:layout_width="250dp"
+                    android:layout_width="170dp"
                     android:layout_height="40dp"
                     android:layout_marginBottom="20dp"
                     android:background="@drawable/signin_button"
                     android:fontFamily="@font/aqum"
-                    android:text="Список выполненных услуг"
+                    android:text="Обновить статус"
                     android:layout_gravity="right"
                     android:textAllCaps="false"
                     android:textColor="#174A42"
@@ -199,8 +95,112 @@
 
             </LinearLayout>
 
-        </ScrollView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="10dp"
+                android:text="Параметры оборудования"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="20sp"/>
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/custom_block_fragment">
+
+                    <EditText
+                        android:id="@+id/field_name_equipment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Наименование оборудования"
+                        android:editable="false"
+                        android:ems="10"
+                        android:textColorHint="#B5B5B5"
+                        android:inputType="none"
+                        android:background="@drawable/input_field"
+                        android:textColor="@color/White"
+                        android:textAllCaps="false"
+                        android:paddingStart="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:textSize="14sp"
+                        android:drawablePadding="13dp"
+                        android:drawableStart="@drawable/ic_name_equipment"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="20dp"
+                        android:autofillHints="" />
+
+                    <EditText
+                        android:id="@+id/field_type_equipment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Тип оборудования"
+                        android:editable="false"
+                        android:ems="10"
+                        android:textColorHint="#B5B5B5"
+                        android:inputType="none"
+                        android:background="@drawable/input_field"
+                        android:textColor="@color/White"
+                        android:textAllCaps="false"
+                        android:paddingStart="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:textSize="14sp"
+                        android:drawablePadding="13dp"
+                        android:drawableStart="@drawable/ic_type_equipment"
+                        android:layout_marginBottom="20dp"
+                        android:autofillHints="" />
+
+                    <EditText
+                        android:id="@+id/field_description_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Описание проблемы"
+                        android:editable="false"
+                        android:ems="10"
+                        android:textColorHint="#B5B5B5"
+                        android:inputType="none"
+                        android:minLines="8"
+                        android:maxLines="12"
+                        android:scrollbars="vertical"
+                        android:gravity="top|left"
+                        android:background="@drawable/input_field"
+                        android:textColor="@color/White"
+                        android:textAllCaps="false"
+                        android:paddingStart="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:textSize="14sp"
+                        android:drawablePadding="13dp"
+                        android:drawableStart="@drawable/ic_description"
+                        android:layout_marginBottom="20dp"
+                        android:autofillHints="" />
+
+                    <Button
+                        android:id="@+id/button_list_regservice"
+                        android:onClick="getListRegServiceByEquipment"
+                        android:enabled="false"
+                        android:layout_width="250dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/signin_button"
+                        android:fontFamily="@font/aqum"
+                        android:text="Список выполненных услуг"
+                        android:layout_gravity="right"
+                        android:textAllCaps="false"
+                        android:textColor="#174A42"
+                        android:textSize="12sp"/>
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </FrameLayout>

@@ -3,7 +3,34 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/authorization_activity.xml" value="0.2747863247863248" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/category_knowledge_fragment.xml" value="0.2863247863247863" />
         <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/google_maps_fragment.xml" value="0.25" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/graph_work_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/header_main_client_menu.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/header_main_speciliast_menu.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/knowledge_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/list_images_item.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/list_notifications_item.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/list_subcategory_item.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/list_tasks_work.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/list_tasks_work_today.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/load_screen.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/loading_dialog.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/main_client_activity.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/main_client_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/main_specialist_activity.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/main_specialist_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/reg_service_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/registration_activity.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/service_centers_fragment.xml" value="0.2747863247863248" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/service_equipment_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/subcategory_knowledge_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/tasks_work_fragment.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/toolbar_client.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/toolbar_specialist.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/layout/verification_email_dialog.xml" value="0.2863247863247863" />
+        <entry key="..\:/ProjectsAndroid/NGService/app/src/main/res/menu/main_client_menu.xml" value="0.2863247863247863" />
       </map>
     </option>
   </component>

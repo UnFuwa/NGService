@@ -49,7 +49,6 @@
                 android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:paddingStart="5dp"
-
                 android:text="Наименование услуги"
                 android:textStyle="bold"
                 android:textColor="@color/White"
@@ -86,6 +85,7 @@
                 android:id="@+id/field_description_service"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:editable="false"
                 android:paddingStart="5dp"
                 android:lines="6"
                 android:text="Описание услуги"

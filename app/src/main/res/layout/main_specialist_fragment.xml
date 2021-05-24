@@ -6,76 +6,85 @@
     android:layout_margin="20dp"
     tools:context=".ui.fragment.specialist.MainSpecialistFragment">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="start"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginBottom="10dp"
-            android:text="Уведомления"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
+        tools:ignore="UselessParent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:orientation="vertical"
-            android:background="@color/DarkLightGray">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_notifications"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="start"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
-            android:text="Рабочие задачи на сегодня"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
+            android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:orientation="vertical"
-            android:background="@drawable/custom_block_fragment">
-
-            <ListView
-                android:id="@+id/list_tasks_work_today"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
-                android:layout_marginBottom="20dp" />
-
-            <Button
-                android:id="@+id/button_tasks_more_details"
-                android:onClick="getTaskDetails"
-                android:layout_width="170dp"
-                android:layout_height="40dp"
-                android:layout_marginRight="18dp"
-                android:background="@drawable/signin_button"
-                android:fontFamily="@font/aqum"
-                android:text="Подробнее"
-                android:layout_gravity="right"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginBottom="10dp"
+                android:text="Уведомления"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
                 android:textAllCaps="false"
-                android:textColor="#174A42"
-                android:textSize="12sp"/>
+                android:textSize="20sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="320dp"
+                android:orientation="vertical"
+                android:background="@color/DarkLightGray">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_notifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:text="Рабочие задачи на сегодня"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="20sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="600dp"
+                android:orientation="vertical"
+                android:background="@drawable/custom_block_fragment">
+
+                <ListView
+                    android:id="@+id/list_tasks_work_today"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp"
+                    android:layout_marginBottom="20dp"
+                    android:nestedScrollingEnabled="true" />
+
+                <Button
+                    android:id="@+id/button_tasks_more_details"
+                    android:onClick="getTaskDetails"
+                    android:layout_width="170dp"
+                    android:layout_height="40dp"
+                    android:layout_marginRight="18dp"
+                    android:background="@drawable/signin_button"
+                    android:fontFamily="@font/aqum"
+                    android:text="Подробнее"
+                    android:layout_gravity="right"
+                    android:textAllCaps="false"
+                    android:textColor="#174A42"
+                    android:textSize="12sp"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

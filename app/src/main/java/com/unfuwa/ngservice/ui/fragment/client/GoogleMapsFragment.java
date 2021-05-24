@@ -112,7 +112,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
             });
-        } catch (SecurityException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -6,183 +6,189 @@
     android:layout_margin="20dp"
     tools:context=".ui.fragment.client.RequestFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="start"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginBottom="10dp"
-            android:text="Параметры заявки"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="20sp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:padding="10dp"
-            android:orientation="vertical"
-            android:background="@drawable/custom_block_fragment">
-
-            <EditText
-                android:id="@+id/field_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Адрес*"
-                android:onClick="selectPlace"
-                android:editable="false"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="text"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_place"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="20dp"
-                android:autofillHints="" />
-
-            <EditText
-                android:id="@+id/field_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Описание проблемы"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="textMultiLine"
-                android:minLines="6"
-                android:maxLines="10"
-                android:scrollbars="vertical"
-                android:gravity="top|left"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_description"
-                android:layout_marginBottom="20dp"
-                android:autofillHints="" />
-
-            <EditText
-                android:id="@+id/field_date_arrive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Дата оказания услуги*"
-                android:onClick="selectDate"
-                android:editable="false"
-                android:ems="10"
-                android:textColorHint="#B5B5B5"
-                android:inputType="date"
-                android:background="@drawable/input_field"
-                android:textColor="@color/White"
-                android:textAllCaps="false"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="14sp"
-                android:drawablePadding="13dp"
-                android:drawableStart="@drawable/ic_date_service"
-                android:layout_marginBottom="20dp"
-                android:autofillHints="" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:layout_marginBottom="10dp"
-            android:text="Список загружаемых фотографий"
-            android:textStyle="bold"
-            android:textColor="@color/DarkGreenCyan"
-            android:textAllCaps="false"
-            android:textSize="18sp"/>
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="10dp"
-            android:orientation="vertical"
-            android:background="@drawable/custom_block_fragment">
+            android:gravity="start"
+            android:orientation="vertical">
 
-            <ListView
-                android:id="@+id/list_images"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="20dp" />
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginBottom="10dp"
+                android:text="Параметры заявки"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
+                android:textAllCaps="false"
+                android:textSize="20sp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="300dp"
+                android:padding="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/custom_block_fragment">
 
-                <TextView
-                    android:layout_width="230dp"
-                    android:layout_height="30dp"
-                    android:gravity="end|center_vertical"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Не более 4 файлов"
-                    android:textStyle="bold|italic"
-                    android:textColor="#DC1212"
+                <EditText
+                    android:id="@+id/field_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Адрес*"
+                    android:onClick="selectPlace"
+                    android:editable="false"
+                    android:ems="10"
+                    android:textColorHint="#B5B5B5"
+                    android:inputType="text"
+                    android:background="@drawable/input_field"
+                    android:textColor="@color/White"
                     android:textAllCaps="false"
-                    android:textSize="12sp"/>
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textSize="14sp"
+                    android:drawablePadding="13dp"
+                    android:drawableStart="@drawable/ic_place"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="20dp"
+                    android:autofillHints="" />
 
-                <ImageView
-                    android:id="@+id/ic_add_photo"
-                    android:src="@drawable/ic_add_photo"
-                    android:onClick="addItemListPhoto"
-                    android:background="@drawable/custom_button_add_photo"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="right"
-                    android:scaleType="centerCrop"/>
+                <EditText
+                    android:id="@+id/field_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Описание проблемы"
+                    android:ems="10"
+                    android:textColorHint="#B5B5B5"
+                    android:inputType="textMultiLine"
+                    android:minLines="6"
+                    android:maxLines="10"
+                    android:scrollbars="vertical"
+                    android:gravity="top|left"
+                    android:background="@drawable/input_field"
+                    android:textColor="@color/White"
+                    android:textAllCaps="false"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textSize="14sp"
+                    android:drawablePadding="13dp"
+                    android:drawableStart="@drawable/ic_description"
+                    android:layout_marginBottom="20dp"
+                    android:autofillHints="" />
 
-                <ImageView
-                    android:id="@+id/ic_delete_photo"
-                    android:src="@drawable/ic_delete_photo"
-                    android:onClick="deleteItemListPhoto"
-                    android:background="@drawable/custom_button_add_photo"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="right"
-                    android:scaleType="centerCrop"/>
+                <EditText
+                    android:id="@+id/field_date_arrive"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Дата оказания услуги*"
+                    android:onClick="selectDate"
+                    android:editable="false"
+                    android:ems="10"
+                    android:textColorHint="#B5B5B5"
+                    android:inputType="date"
+                    android:background="@drawable/input_field"
+                    android:textColor="@color/White"
+                    android:textAllCaps="false"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textSize="14sp"
+                    android:drawablePadding="13dp"
+                    android:drawableStart="@drawable/ic_date_service"
+                    android:layout_marginBottom="20dp"
+                    android:autofillHints="" />
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/button_send_request"
-                android:onClick="sendRequest"
-                android:layout_width="170dp"
-                android:layout_height="40dp"
-                android:background="@drawable/signin_button"
-                android:fontFamily="@font/aqum"
-                android:text="Отправить заявку"
-                android:layout_gravity="right"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginBottom="10dp"
+                android:text="Список загружаемых фотографий"
+                android:textStyle="bold"
+                android:textColor="@color/DarkGreenCyan"
                 android:textAllCaps="false"
-                android:textColor="#174A42"
-                android:textSize="12sp"/>
+                android:textSize="18sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/custom_block_fragment">
+
+                <ListView
+                    android:id="@+id/list_images"
+                    android:layout_width="match_parent"
+                    android:layout_height="440dp"
+                    android:layout_marginBottom="20dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="230dp"
+                        android:layout_height="30dp"
+                        android:gravity="end|center_vertical"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="Не более 4 файлов"
+                        android:textStyle="bold|italic"
+                        android:textColor="#DC1212"
+                        android:textAllCaps="false"
+                        android:textSize="12sp"/>
+
+                    <ImageView
+                        android:id="@+id/ic_add_photo"
+                        android:src="@drawable/ic_add_photo"
+                        android:onClick="addItemListPhoto"
+                        android:background="@drawable/custom_button_add_photo"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_gravity="right"
+                        android:scaleType="centerCrop"/>
+
+                    <ImageView
+                        android:id="@+id/ic_delete_photo"
+                        android:src="@drawable/ic_delete_photo"
+                        android:onClick="deleteItemListPhoto"
+                        android:background="@drawable/custom_button_add_photo"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_gravity="right"
+                        android:scaleType="centerCrop"/>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/button_send_request"
+                    android:onClick="sendRequest"
+                    android:layout_width="170dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/signin_button"
+                    android:fontFamily="@font/aqum"
+                    android:text="Отправить заявку"
+                    android:layout_gravity="right"
+                    android:textAllCaps="false"
+                    android:textColor="#174A42"
+                    android:textSize="12sp"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

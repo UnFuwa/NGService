@@ -31,12 +31,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
-                    android:textSize="14sp"
-                    android:textColor="@color/White"
                     android:inputType="text"
-                    app:queryHint="Поиск"
+                    android:textColor="@color/White"
+                    android:textColorHint="#B5B5B5"
+                    android:textSize="14sp"
                     app:defaultQueryHint="Поиск"
-                    android:textColorHint="#B5B5B5"/>
+                    app:queryHint="Поиск" />
 
             </RelativeLayout>
 

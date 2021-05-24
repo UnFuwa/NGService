@@ -105,7 +105,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MainClientActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private final int CALL_PHONE_PERMISSION = 1;
-    private final int ACCESS_LOCATION_PERMISSION = 1;
+    private final int ACCESS_LOCATION_PERMISSION = 2;
 
     private static final String NUMBER_CALL_PHONE = "81234567890";
 
@@ -328,16 +328,42 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             item.setChecked(false);
         }
 
-        drawerLayout.closeDrawer(GravityCompat.START);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), "Разрешение приложению было предоставлено!", Toast.LENGTH_SHORT).show();
 
-        fragmentManager.beginTransaction()
-                .hide(activeFragment)
-                .show(serviceCentersFragment)
-                .commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
 
-        activeFragment = serviceCentersFragment;
+            fragmentManager.beginTransaction()
+                    .hide(activeFragment)
+                    .show(serviceCentersFragment)
+                    .commit();
 
-        nameFragment.setText("Сервис центры");
+            activeFragment = serviceCentersFragment;
+
+            nameFragment.setText("Сервис центры");
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Разрешения приложения")
+                        .setMessage("Это разрешение необходимо для выполнения данной функциональности!")
+                        .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(MainClientActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_LOCATION_PERMISSION);
+                            }
+                        })
+                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create()
+                        .show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_LOCATION_PERMISSION);
+            }
+        }
     }
 
     public void changeFragmentStatusRepair(MenuItem item) {
@@ -830,7 +856,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                         googleMap.clear();
 
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
                     } else {
                         Toast.makeText(getApplicationContext(), "Возникла ошибка при определении вашего местоположения!", Toast.LENGTH_SHORT).show();
                     }
