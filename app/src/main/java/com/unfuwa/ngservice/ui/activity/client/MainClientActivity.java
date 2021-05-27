@@ -449,7 +449,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             labelStatusRepair.setText("Исправлено");
         } else {
             iconStatusRepair.setImageResource(R.drawable.ic_status_repair_is_not_done);
-            labelStatusRepair.setText("Неисправлено");
+            labelStatusRepair.setText("Не исправлено");
         }
 
         fieldNameEquipment.setText(equipment.getName());

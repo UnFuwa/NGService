@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -93,6 +94,10 @@ import com.unfuwa.ngservice.util.adapter.AdapterNotifications;
 import com.unfuwa.ngservice.util.database.DatabaseApi;
 import com.unfuwa.ngservice.util.email.GMailSender;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,6 +119,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private Thread threadNotification;
     private volatile boolean lifeCycleThreadNotification;
+
+    private static final String CACHE_NAME = "token.txt";
+    private String CACHE_PATH;
+    private String token;
+    private File file;
 
     private SpecialistUser specialist;
 
@@ -178,6 +188,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     private EditText fieldDescriptionProblemDetail;
     private Button buttonUpdateDescriptionProblem;
     private EquipmentClient equipmentClient;
+    private ArrayList<RegServiceExtended> listRegServiceEmail;
     private double sumPriceEmailSend = 0.0;
     private int countPricesEmailSend = 0;
 
@@ -262,6 +273,8 @@ public class MainSpecialistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_specialist_activity);
 
+        CACHE_PATH = getApplicationContext().getDataDir().getPath() + "/" + CACHE_NAME;
+
         dbApi = DatabaseApi.getInstance(getApplicationContext());
         notificationDao = dbApi.notificationDao();
 
@@ -334,6 +347,17 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .commit();
 
         activeFragment = mainSpecialistFragment;
+
+        file = new File(CACHE_PATH);
+
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader readFile = new BufferedReader(fileReader);
+
+            while((token = readFile.readLine()) != null) readFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         selectTaskWorkToday = -1;
         taskWork = null;
@@ -423,6 +447,12 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        file.delete();
+
+                        if (file.exists()) {
+                            file.delete();
+                        }
+
                         dialog.dismiss();
 
                         Toast.makeText(getApplicationContext(), "Выход из аккаунта успешно выполнен!", Toast.LENGTH_SHORT).show();
@@ -825,7 +855,6 @@ public class MainSpecialistActivity extends AppCompatActivity {
     public void setStatusRepairCompleteEquipment(View view) {
         RegServiceDao regServiceDao = dbApi.regServiceDao();
         EquipmentDao equipmentDao = dbApi.equipmentDao();
-        GMailSender gMailSender = new GMailSender();
 
         equipmentClient.getEquipment().setStatusRepair(true);
 
@@ -839,29 +868,16 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::startCalculationSumPriceEmail, Throwable::printStackTrace);
 
-        Disposable disposable2 = Completable.fromAction(new Action() {
-                    @Override
-                    public void run() throws Throwable {
-                        gMailSender.sendMail(
-                        "Оповещение об выполнении сервисного обслуживания оборудования" + " " + Integer.toString(equipmentClient.getEquipment().getId()),
-                        "Здравствуйте " + equipmentClient.getClient().getFName() + " " + equipmentClient.getClient().getIName() + " " + equipmentClient.getClient().getOName() + " "
-                                + " мы рады вас уведомить, что оборудование с идентификатором" + " " + Integer.toString(equipmentClient.getEquipment().getId()) + " " + "полностью исправно!" + "\n"
-                                + "Сумма оплаты составляет: " + Double.toString(sumPriceEmailSend) + "руб. Ждем вас в сервисном центре. Спасибо, что выбираете нас!",
-                        "ru.unfuwa.ngservice@gmail.com", equipmentClient.getClient().getEmail());
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
-
         compositeDisposable.add(disposable);
         compositeDisposable.add(disposable1);
-        compositeDisposable.add(disposable2);
     }
 
     private void startCalculationSumPriceEmail(List<RegServiceExtended> list) {
+        sumPriceEmailSend = 0.0;
+        countPricesEmailSend = 0;
+
         ArrayList<Double> listPricesEmail = new ArrayList<>();
-        ArrayList<RegServiceExtended> listRegServiceEmail = new ArrayList<>(list);
+        listRegServiceEmail = new ArrayList<>(list);
 
         for(RegServiceExtended regServiceExtended : listRegServiceEmail) {
             listPricesEmail.add(regServiceExtended.getService().getPrice());
@@ -882,6 +898,28 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         if (countPricesEmailSend == 0) {
             sumPriceEmailSend = 0;
+        }
+
+        GMailSender gMailSender = new GMailSender();
+
+        if (listRegServiceEmail.size() == countPricesEmailSend) {
+            Disposable disposable = Completable.fromAction(new Action() {
+                @Override
+                public void run() throws Throwable {
+                    gMailSender.sendMail(
+                            "Оповещение об выполнении сервисного обслуживания оборудования" + " " + Integer.toString(equipmentClient.getEquipment().getId()),
+                            "Здравствуйте " + equipmentClient.getClient().getFName() + " " + equipmentClient.getClient().getIName() + " " + equipmentClient.getClient().getOName() + " "
+                                    + " мы рады вас уведомить, что оборудование с идентификатором" + " " + Integer.toString(equipmentClient.getEquipment().getId()) + " " + "полностью исправно!" + "\n"
+                                    + "Сумма оплаты составляет: " + Double.toString(sumPriceEmailSend) + " руб. Ждем вас в сервисном центре. Спасибо, что выбираете нас!",
+                            "ru.unfuwa.ngservice@gmail.com", equipmentClient.getClient().getEmail());
+                }
+            })
+                    .delay(5, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+
+            compositeDisposable.add(disposable);
         }
     }
 
@@ -1040,7 +1078,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
 
         Disposable disposable = Observable.fromIterable(listPrices)
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showMessageSuccessSumPrice, throwable -> showMessageErrorSumPrice());
 
@@ -1152,7 +1190,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         fieldNameEquipment = findViewById(R.id.field_name_equipment);
         fieldCharactersEquipment = findViewById(R.id.field_characters);
         fieldDescriptionProblem = findViewById(R.id.field_description_problem);
-        buttonAddEquipment = findViewById(R.id.button_add_equipment);
+        buttonAddEquipment = addEquipmentFragment.getView().findViewById(R.id.button_add_equipment);
 
         isExistEmailClient = 0;
 
@@ -1166,13 +1204,20 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Observable<Integer> isExistEmail = RxTextView.textChanges(fieldEmailClient)
                 .skip(1)
                 .map(CharSequence::toString)
-                .flatMap(string -> clientDao.hasClientByEmail(fieldEmailClient.getText().toString())
+                .debounce(1, TimeUnit.SECONDS)
+                .switchMap(string -> clientDao.hasClientByEmail(fieldEmailClient.getText().toString())
                         .toObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .distinctUntilChanged();
+
+        Disposable disposable2 = isExistEmail
+                .map(this::isValidEmailClient)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledAddEquipment);
 
         Observable<String> typeEquipmentField = RxTextView.textChanges(fieldTypeEquipment)
                 .skip(1)
@@ -1202,10 +1247,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .distinctUntilChanged();
 
-        Disposable disposable = validFieldsAddEquipment.combineLatest(emailClientField, typeEquipmentField, nameEquipmentField, charactersEquipmentField, descriptionProblemField, isExistEmail, this::isValidationFieldsAddEquipment)
+        Disposable disposable = Observable.combineLatest(emailClientField, typeEquipmentField, nameEquipmentField, charactersEquipmentField, descriptionProblemField, this::isValidationFieldsAddEquipment)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::enabledAddEquipment);
+                .subscribe(this::enabledAddEquipment, Throwable::printStackTrace);
 
         Disposable disposable1 = typeEquipmentDao.getTypesEquipment()
                 .subscribeOn(Schedulers.io())
@@ -1214,6 +1259,11 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         compositeDisposable.add(disposable);
         compositeDisposable.add(disposable1);
+        compositeDisposable.add(disposable2);
+    }
+
+    private void point(boolean b) {
+
     }
 
     private void createListTypesEquipment(List<TypeEquipment> list) {
@@ -1249,12 +1299,20 @@ public class MainSpecialistActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidationFieldsAddEquipment(String emailClientField, String typeEquipmentField, String nameEquipmentField, String charactersEquipmentField, String descriptionProblemField, int isExistEmail) {
+    private boolean isValidEmailClient(Integer isExistEmail) {
+        if (isExistEmail != 1) {
+            fieldEmailClient.setError("Вы ввели несуществующий адрес эл. почты!");
+            isValidEmailClient = false;
+        } else {
+            isValidEmailClient = true;
+        }
+
+        return isValidEmailClient;
+    }
+
+    private boolean isValidationFieldsAddEquipment(String emailClientField, String typeEquipmentField, String nameEquipmentField, String charactersEquipmentField, String descriptionProblemField) {
         if (emailClientField.isEmpty()) {
             fieldEmailClient.setError("Вы не ввели значение эл.почты!");
-            isValidEmailClient = false;
-        } else if (isExistEmail != 1) {
-            fieldEmailClient.setError("Вы ввели несуществующий адрес эл. почты!");
             isValidEmailClient = false;
         } else if (!emailClientField.contains("@")) {
             fieldEmailClient.setError("Вы ввели неверное значение эл.почты! Отсутствует '@'.");

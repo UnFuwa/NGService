@@ -302,7 +302,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
+                                if (task.isSuccessful() && task.isComplete()) {
                                     task.getResult().getUser().sendEmailVerification()
                                         .addOnCompleteListener(task1 -> {
                                             if (task1.isSuccessful()) {
