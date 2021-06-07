@@ -33,6 +33,6 @@ public interface GraphWorkDao {
             "AND g.Date = :date " +
             "AND g.FlagDay = 1 " +
             "AND t.FlagComplete = 0 " +
-            "AND g.Date BETWEEN t.DateFrom AND t.DateTo")
+            "AND g.Date <= t.DateTo")
     Flowable<List<GraphTaskWork>> getTasksWorkTodayBySpecialist(String login, String date);
 }

@@ -20,6 +20,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -835,9 +837,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
                     fieldDescriptionProblemDetail.setError("Вы не ввели значение описания проблемы!");
                     isValidDescriptionProblemDetail = false;
                 } else if (descriptionProblemEquipmentField.length() > 400) {
-                    fieldDescriptionProblem.setError("Количество символов превышает отметку в 400 знаков!");
+                    fieldDescriptionProblemDetail.setError("Количество символов превышает отметку в 400 знаков!");
                     isValidDescriptionProblem = false;
                 } else {
+                    fieldDescriptionProblemDetail.setError(null);
                     isValidDescriptionProblemDetail = true;
                 }
 
@@ -858,18 +861,27 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
         equipmentClient.getEquipment().setStatusRepair(true);
 
-        Disposable disposable = equipmentDao.update(equipmentClient.getEquipment())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+        ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        Disposable disposable1 = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::startCalculationSumPriceEmail, Throwable::printStackTrace);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
-        compositeDisposable.add(disposable);
-        compositeDisposable.add(disposable1);
+        if (isConnected) {
+            Disposable disposable = equipmentDao.update(equipmentClient.getEquipment())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+
+            Disposable disposable1 = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::startCalculationSumPriceEmail, Throwable::printStackTrace);
+
+            compositeDisposable.add(disposable);
+            compositeDisposable.add(disposable1);
+        } else {
+            Toast.makeText(getApplicationContext(), "Отсутствует подключения к Интернету!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void startCalculationSumPriceEmail(List<RegServiceExtended> list) {
@@ -905,7 +917,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         if (listRegServiceEmail.size() == countPricesEmailSend) {
             Disposable disposable = Completable.fromAction(new Action() {
                 @Override
-                public void run() throws Throwable {
+                public void run() throws RuntimeException {
                     gMailSender.sendMail(
                             "Оповещение об выполнении сервисного обслуживания оборудования" + " " + Integer.toString(equipmentClient.getEquipment().getId()),
                             "Здравствуйте " + equipmentClient.getClient().getFName() + " " + equipmentClient.getClient().getIName() + " " + equipmentClient.getClient().getOName() + " "
@@ -917,7 +929,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
                     .delay(5, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteRepairEquipment());
+                    .subscribe(this::showMessageCompleteRepairEquipment, throwable -> showMessageErrorCompleteSendMail());
 
             compositeDisposable.add(disposable);
         }
@@ -929,6 +941,10 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private void showMessageErrorCompleteRepairEquipment() {
         Toast.makeText(getApplicationContext(), "Возникла ошибка при завершении ремонта оборудования!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorCompleteSendMail() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка при отправки оповещения клиента! ", Toast.LENGTH_SHORT).show();
     }
 
     public void updateDescriptionProblemEquipment(View view) {
@@ -945,7 +961,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     private void showMessageUpdateDescriptionEquipment() {
-        Toast.makeText(getApplicationContext(), "Описания пробелмы обрудования было успешно изменено!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Описания проблемы оборудования было успешно изменено!", Toast.LENGTH_SHORT).show();
     }
 
     private void showMessageErrorUpdateDescriptionEquipment() {
@@ -983,6 +999,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
         buttonAddService = findViewById(R.id.button_add_item_list_reg_service);
 
         fieldIdEquipmentAddService.setText(Integer.toString(equipmentClient.getEquipment().getId()));
+        sumPriceRegService.setText("ИТОГО: 0 руб.");
 
         Disposable disposable = regServiceDao.getRegServiceByEquipment(equipmentClient.getEquipment().getId())
                 .subscribeOn(Schedulers.io())
@@ -1204,20 +1221,20 @@ public class MainSpecialistActivity extends AppCompatActivity {
         Observable<Integer> isExistEmail = RxTextView.textChanges(fieldEmailClient)
                 .skip(1)
                 .map(CharSequence::toString)
-                .debounce(1, TimeUnit.SECONDS)
+                .debounce(400, TimeUnit.MILLISECONDS)
                 .switchMap(string -> clientDao.hasClientByEmail(fieldEmailClient.getText().toString())
                         .toObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()))
+                .doOnError(Throwable::printStackTrace)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .distinctUntilChanged();
+                .observeOn(AndroidSchedulers.mainThread());
 
         Disposable disposable2 = isExistEmail
                 .map(this::isValidEmailClient)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::enabledAddEquipment);
+                .subscribe(this::enabledAddEquipment, Throwable::printStackTrace);
 
         Observable<String> typeEquipmentField = RxTextView.textChanges(fieldTypeEquipment)
                 .skip(1)
@@ -1262,10 +1279,6 @@ public class MainSpecialistActivity extends AppCompatActivity {
         compositeDisposable.add(disposable2);
     }
 
-    private void point(boolean b) {
-
-    }
-
     private void createListTypesEquipment(List<TypeEquipment> list) {
         listTypesEquipment = new ArrayList<>();
 
@@ -1304,6 +1317,7 @@ public class MainSpecialistActivity extends AppCompatActivity {
             fieldEmailClient.setError("Вы ввели несуществующий адрес эл. почты!");
             isValidEmailClient = false;
         } else {
+            fieldEmailClient.setError(null);
             isValidEmailClient = true;
         }
 
@@ -1634,36 +1648,45 @@ public class MainSpecialistActivity extends AppCompatActivity {
     }
 
     public void downloadFullContent(View view) {
+        ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
         Disposable disposable = Flowable.just(knowledgeBase)
                 .doOnNext(knowledgeBase -> {
                     StorageReference requestRef = storageReference.child("full_content_knowledgebase/pdf/" + knowledgeBase.getURL());
 
-                    requestRef.getDownloadUrl()
-                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    //progressDialog.dismiss();
-                                    DownloadManager downloadManager = (DownloadManager) getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                                    Uri uriDownload = Uri.parse(uri.toString());
-                                    DownloadManager.Request request = new DownloadManager.Request(uriDownload);
+                    if (isConnected) {
+                        requestRef.getDownloadUrl()
+                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        //progressDialog.dismiss();
+                                        DownloadManager downloadManager = (DownloadManager) getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                                        Uri uriDownload = Uri.parse(uri.toString());
+                                        DownloadManager.Request request = new DownloadManager.Request(uriDownload);
 
-                                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                                    request.setDestinationInExternalFilesDir(getApplicationContext(), Environment.DIRECTORY_DOWNLOADS, knowledgeBase.getURL());
+                                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                        request.setDestinationInExternalFilesDir(getApplicationContext(), Environment.DIRECTORY_DOWNLOADS, knowledgeBase.getURL());
 
-                                    downloadManager.enqueue(request);
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    //progressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла! (Отсутствие подключения к Интернету)", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                                        downloadManager.enqueue(request);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        //progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        throw new RuntimeException();
+                    }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showMessageSuccessDownload, Throwable::printStackTrace);
+                .subscribe(this::showMessageSuccessDownload, throwable -> showMessageErrorDownload());
 
         compositeDisposable.add(disposable);
 
@@ -1671,5 +1694,9 @@ public class MainSpecialistActivity extends AppCompatActivity {
 
     private void showMessageSuccessDownload(KnowledgeBase knowledgeBase) {
         Toast.makeText(getApplicationContext(), "Успешно окончено скачивание файла " + knowledgeBase.getURL() + "!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorDownload() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка во время скачивания файла! (Отсутствие подключения к Интернету)", Toast.LENGTH_SHORT).show();
     }
 }

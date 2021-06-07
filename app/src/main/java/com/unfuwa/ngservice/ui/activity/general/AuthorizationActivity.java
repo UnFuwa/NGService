@@ -176,41 +176,27 @@ public class AuthorizationActivity extends AppCompatActivity {
     public void startNextActivity(User user) {
         Disposable disposable;
 
-        File file = new File(CACHE_PATH);
+        switch (user.getNameAccessRight()) {
+            case "Client":
+                ClientDao clientDao = dbApi.clientDao();
 
-        try {
-            file.createNewFile();
+                disposable = clientDao.getClientByEmail(user.getLogin())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
 
-            FileWriter writeFile = new FileWriter(file);
+                compositeDisposable.add(disposable);
+                break;
+            case "Specialist":
+                SpecialistDao specialistDao = dbApi.specialistDao();
 
-            writeFile.append(user.getToken() + System.lineSeparator());
-
-            writeFile.close();
-
-            switch (user.getNameAccessRight()) {
-                case "Client":
-                    ClientDao clientDao = dbApi.clientDao();
-
-                    disposable = clientDao.getClientByEmail(user.getLogin())
+                disposable = specialistDao.getSpecialistByUser(user.getLogin())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
+                        .subscribe(this::startMainSpecialistActivity, throwable -> showErrorMessage());
 
-                    compositeDisposable.add(disposable);
-                    break;
-                case "Specialist":
-                    SpecialistDao specialistDao = dbApi.specialistDao();
-
-                    disposable = specialistDao.getSpecialistByUser(user.getLogin())
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::startMainSpecialistActivity, throwable -> showErrorMessage());
-
-                    compositeDisposable.add(disposable);
-                    break;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+                compositeDisposable.add(disposable);
+                break;
         }
     }
 
@@ -219,30 +205,49 @@ public class AuthorizationActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        firebaseUser = task.getResult().getUser();
+                        if (task.isSuccessful()) {
+                            firebaseUser = task.getResult().getUser();
 
-                        if (task.isSuccessful() && firebaseUser.isEmailVerified()) {
-                            Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
-                            intent.putExtra("client", client);
-                            startActivity(intent);
+                            if (task.isComplete() && firebaseUser.isEmailVerified()) {
+                                try {
+                                    File file = new File(CACHE_PATH);
+
+                                    file.createNewFile();
+
+                                    FileWriter writeFile = new FileWriter(file);
+
+                                    writeFile.append(client.getUser().getToken() + System.lineSeparator());
+
+                                    writeFile.close();
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                                Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
+                                intent.putExtra("client", client);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Адрес электронный почты не был подтвержден, выполнена повторная отправка!", Toast.LENGTH_SHORT).show();
+
+                                firebaseUser.sendEmailVerification()
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                Disposable disposable = Flowable.just(task1)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .doOnSubscribe(subscription -> verifactionEmailDialog.showVerification())
+                                                        .subscribe(this::verificationEmail, Throwable::printStackTrace);
+
+                                                compositeDisposable.add(disposable);
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Невалидный адрес)", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
                         } else {
-                            Toast.makeText(getApplicationContext(), "Адрес электронный почты не был подтвержден, выполнена повторная отправка!", Toast.LENGTH_SHORT).show();
-
-                            firebaseUser.sendEmailVerification()
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            Disposable disposable = Flowable.just(task1)
-                                                    .subscribeOn(Schedulers.io())
-                                                    .observeOn(AndroidSchedulers.mainThread())
-                                                    .doOnSubscribe(subscription -> verifactionEmailDialog.showVerification())
-                                                    .subscribe(this::verificationEmail, Throwable::printStackTrace);
-
-                                            compositeDisposable.add(disposable);
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Невалидный адрес)", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+                            Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Отсутствует подключение к Интернету)", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -288,9 +293,9 @@ public class AuthorizationActivity extends AppCompatActivity {
 
                             Toast.makeText(getApplicationContext(), "Адрес электронной почты был подтвержден!", Toast.LENGTH_SHORT).show();
 
-                            File file = new File(CACHE_PATH);
-
                             try {
+                                File file = new File(CACHE_PATH);
+
                                 if (file.exists()) {
                                     file.delete();
                                 }
@@ -323,6 +328,21 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     private void startMainSpecialistActivity(SpecialistUser specialist) {
+        try {
+            File file = new File(CACHE_PATH);
+
+            file.createNewFile();
+
+            FileWriter writeFile = new FileWriter(file);
+
+            writeFile.append(specialist.getUser().getToken() + System.lineSeparator());
+
+            writeFile.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ специалиста!", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, MainSpecialistActivity.class);
         intent.putExtra("specialist", specialist);

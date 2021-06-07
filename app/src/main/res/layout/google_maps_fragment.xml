@@ -10,7 +10,7 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <RelativeLayout
         android:id="@+id/relative_layout_1"
@@ -45,17 +45,17 @@
 
         <Button
             android:id="@+id/button_search_location"
-            android:onClick="searchLocation"
-            android:layout_toRightOf="@id/field_search_maps"
             android:layout_width="60dp"
             android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/field_search_maps"
             android:background="@drawable/search_maps_button"
             android:fontFamily="@font/aqum"
+            android:onClick="searchLocation"
             android:text="Найти"
-            android:layout_centerVertical="true"
             android:textAllCaps="false"
             android:textColor="#174A42"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
 
     </RelativeLayout>
 

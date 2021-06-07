@@ -106,8 +106,6 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
         getMyLocation();
     }
 
-
-
     private void addServiceCenters(List<FilialCity> listAllItems) {
         if (googleMap != null && myLocation != null) {
             listFilials = new ArrayList<>(listAllItems);
@@ -142,9 +140,6 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
                         //double distance1 = Math.pow((x - x0), 2) + Math.pow((y - y0), 2);
                         double distance1 = 2 * 6371000 * Math.asin(Math.sqrt(Math.pow((Math.sin((x0 * (3.14159 / 180) - x * (3.14159 / 180)) / 2)), 2) + Math.cos(x0 * (3.14159 / 180)) * Math.cos(x * (3.14159 / 180)) * Math.sin(Math.pow(((y0 * (3.14159 / 180) - y * (3.14159 / 180)) / 2), 2))));
                         double distance2 = r;
-
-                        Log.d("FILIAL", String.valueOf(distance1));
-                        Log.d("FILIAL", String.valueOf(distance2));
 
                         if (distance1 < distance2) {
                             listMarkersNearNearbyFilials.add(googleMap.addMarker(new MarkerOptions().position(location).title(address.getAddressLine(0))));
@@ -187,11 +182,11 @@ public class ServiceCentersFragment extends Fragment implements OnMapReadyCallba
                     Disposable disposable = filialCityDao.getListFilials()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::addServiceCenters, throwable -> throwable.printStackTrace());
+                            .subscribe(this::addServiceCenters, throwable -> showErrorMessage());
 
                     compositeDisposable.add(disposable);
                 } else {
-                    Toast.makeText(context, "Возникла ошибка при определении вашего местоположения!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Ошибка Google Services! (Отсутсвует Интернет подключение или не вкл. передача данных о местоположении)", Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (SecurityException e) {

@@ -39,6 +39,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -95,8 +98,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -120,6 +125,9 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    private Date dateNow;
+    private Date datePick;
+
     private EditText fieldAddress;
     private EditText fieldDescription;
     private EditText fieldDateArrive;
@@ -139,7 +147,6 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     private StorageReference storageReference;
 
     private EditText fieldSearch;
-    private Place place;
     private PlacesClient placesClient;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     private List<Place.Field> fields;
@@ -281,9 +288,35 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
         placesClient = Places.createClient(getApplicationContext());
-        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
 
         activeFragment = mainClientFragment;
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        LocationRequest mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(60000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setNumUpdates(1);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationCallback mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+
+                    }
+                }
+            }
+        };
+        LocationServices.getFusedLocationProviderClient(getApplicationContext()).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
     @Override
@@ -331,9 +364,35 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(getApplicationContext(), "Разрешение приложению было предоставлено!", Toast.LENGTH_SHORT).show();
 
+            LocationRequest mLocationRequest = LocationRequest.create();
+            mLocationRequest.setInterval(60000);
+            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            LocationCallback mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null) {
+                        return;
+                    }
+                    for (Location location : locationResult.getLocations()) {
+                        if (location != null) {
+
+                        }
+                    }
+                }
+            };
+            LocationServices.getFusedLocationProviderClient(getApplicationContext()).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+
             drawerLayout.closeDrawer(GravityCompat.START);
 
             fragmentManager.beginTransaction()
+                    .remove(serviceCentersFragment)
+                    .commit();
+
+            serviceCentersFragment = new ServiceCentersFragment(getApplicationContext(), this);
+
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, serviceCentersFragment, "ServiceCenters")
                     .hide(activeFragment)
                     .show(serviceCentersFragment)
                     .commit();
@@ -496,7 +555,6 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                 .distinctUntilChanged();
 
         Observable<String> descriptionField = RxTextView.textChanges(fieldDescription)
-                .skip(1)
                 .map(CharSequence::toString)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -509,12 +567,19 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                 .observeOn(AndroidSchedulers.mainThread())
                 .distinctUntilChanged();
 
-        Disposable disposable = validFieldsRequestFragment.combineLatest(addressField, descriptionField, dateArriveField, this::isValidationFieldsRequestFragment)
+        Disposable disposable1 = dateArriveField
+                .map(this::isValidDate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::enabledSendRequest);
+
+        Disposable disposable = validFieldsRequestFragment.combineLatest(addressField, descriptionField, this::isValidationFieldsRequestFragment)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::enabledSendRequest);
 
         compositeDisposable.add(disposable);
+        compositeDisposable.add(disposable1);
     }
 
     public void addItemListPhoto(View view) {
@@ -558,7 +623,44 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         }
     }
 
-    private boolean isValidationFieldsRequestFragment(String addressField, String descriptionField, String dateArriveField) {
+    private boolean isValidDate(String dateArriveField) {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(datePick);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        datePick = calendar.getTime();
+
+        dateNow = new Date();
+
+        calendar.setTime(dateNow);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        dateNow = calendar.getTime();
+
+        Log.d("DATE", String.valueOf(datePick.before(dateNow)));
+
+        if (dateArriveField.isEmpty()) {
+            fieldDateArrive.setError("Вы не ввели значение даты оказания услуги!");
+            isValidDateArrive = false;
+        } else if (datePick.before(dateNow)) {
+            fieldDateArrive.setError("Вы ввели значение прошедшей даты!");
+            isValidDateArrive = false;
+        } else {
+            fieldDateArrive.setError(null);
+            isValidDateArrive = true;
+        }
+
+        return isValidDateArrive;
+    }
+
+    private boolean isValidationFieldsRequestFragment(String addressField, String descriptionField) {
         if (addressField.isEmpty()) {
             fieldAddress.setError("Вы не ввели значение адреса!");
             isValidAddress = false;
@@ -569,60 +671,78 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             isValidAddress = true;
         }
 
-        if (descriptionField.isEmpty()) {
-            fieldDescription.setError("Вы не ввели описание!");
-            isValidDescription = false;
-        } else if (descriptionField.length() > 400) {
+        if (descriptionField.length() > 400) {
             fieldDescription.setError("Количество символов превышает отметку в 400 знаков!");
             isValidDescription = false;
         } else {
             isValidDescription = true;
         }
 
-        if (dateArriveField.isEmpty()) {
-            fieldDateArrive.setError("Вы не ввели значение даты оказания услуги!");
-            isValidDateArrive = false;
-        } else {
-            isValidDateArrive = true;
-        }
-
-        return isValidAddress && isValidDescription && isValidDateArrive;
+        return isValidAddress && isValidDescription;
     }
 
     public void sendRequest(View view) {
         RequestDao requestDao = dbApi.requestDao();
 
-        Date dateNow = new Date();
+        dateNow = new Date();
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
         String formatDate = dateFormat.format(dateNow);
 
-        Request request = new Request(
-                client.getClient().getEmail(),
-                fieldAddress.getText().toString(),
-                fieldDescription.getText().toString(),
-                fieldDateArrive.getText().toString(),
-                formatDate);
+        if (!fieldDescription.getText().toString().isEmpty()) {
+            Request request = new Request(
+                    client.getClient().getEmail(),
+                    fieldAddress.getText().toString(),
+                    fieldDescription.getText().toString(),
+                    fieldDateArrive.getText().toString(),
+                    formatDate);
 
-        if (listPhotos.size() == 0) {
-            Disposable disposable = requestDao.insert(request)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
-                    .doOnTerminate(loadingDialog::hideLoading)
-                    .subscribe(this::showMessageSuccessRequest, Throwable::printStackTrace);
+            if (listPhotos.size() == 0) {
+                Disposable disposable = requestDao.insert(request)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                        .doOnTerminate(loadingDialog::hideLoading)
+                        .subscribe(this::showMessageSuccessRequest, Throwable::printStackTrace);
 
-            compositeDisposable.add(disposable);
+                compositeDisposable.add(disposable);
+            } else {
+                Disposable disposable = requestDao.insert(request)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                        .doOnTerminate(loadingDialog::hideLoading)
+                        .subscribe(this::uploadPhotos, Throwable::printStackTrace);
+
+                compositeDisposable.add(disposable);
+            }
         } else {
-            listPhotos.size();
-            Disposable disposable = requestDao.insert(request)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
-                    .doOnTerminate(loadingDialog::hideLoading)
-                    .subscribe(this::uploadPhotos, Throwable::printStackTrace);
+            Request request = new Request(
+                    client.getClient().getEmail(),
+                    fieldAddress.getText().toString(),
+                    null,
+                    fieldDateArrive.getText().toString(),
+                    formatDate);
 
-            compositeDisposable.add(disposable);
+            if (listPhotos.size() == 0) {
+                Disposable disposable = requestDao.insert(request)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                        .doOnTerminate(loadingDialog::hideLoading)
+                        .subscribe(this::showMessageSuccessRequest, throwable -> showMessageErrorRequest());
+
+                compositeDisposable.add(disposable);
+            } else {
+                Disposable disposable = requestDao.insert(request)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
+                        .doOnTerminate(loadingDialog::hideLoading)
+                        .subscribe(this::uploadPhotos, Throwable::printStackTrace);
+
+                compositeDisposable.add(disposable);
+            }
         }
     }
 
@@ -663,7 +783,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable1 -> loadingDialog.showLoading())
                 .doOnTerminate(loadingDialog::hideLoading)
-                .subscribe(this::showMessageSuccessRequest, Throwable::printStackTrace);
+                .subscribe(this::showMessageSuccessRequest, throwable -> showMessageErrorRequest());
 
         compositeDisposable.add(disposable);
     }
@@ -674,6 +794,10 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
     private void showMessageSuccessRequest(Long id) {
         Toast.makeText(getApplicationContext(), "Отправка заявки прошла успешно!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageErrorRequest() {
+        Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки заявки!", Toast.LENGTH_SHORT).show();
     }
 
     public void logout(MenuItem item) {
@@ -770,6 +894,10 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         datePickerDialog.show();
 
         dateSetListener = (view1, year1, month1, dayOfMonth) -> {
+            calendar.set(year1, month1, dayOfMonth);
+
+            datePick = calendar.getTime();
+
             if (dayOfMonth < 10 && month1 < 10) {
                 fieldDateArrive.setText("0" + Integer.toString(dayOfMonth) + "." + "0" + Integer.toString(month1 + 1) + "." + Integer.toString(year1));
             } else if (dayOfMonth < 10) {
@@ -785,6 +913,25 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     public void selectPlace(View view) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(getApplicationContext(), "Разрешение приложению было предоставлено!", Toast.LENGTH_SHORT).show();
+
+            LocationRequest mLocationRequest = LocationRequest.create();
+            mLocationRequest.setInterval(60000);
+            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            LocationCallback mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null) {
+                        return;
+                    }
+                    for (Location location : locationResult.getLocations()) {
+                        if (location != null) {
+
+                        }
+                    }
+                }
+            };
+            LocationServices.getFusedLocationProviderClient(getApplicationContext()).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
             fragmentManager.beginTransaction()
                     .hide(activeFragment)
@@ -836,7 +983,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
             googleMap.addMarker(new MarkerOptions().position(location).title(address.getAddressLine(0)));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "Возникла ошибка при определении местоположения! (Нечего не найдено)", Toast.LENGTH_SHORT).show();
         }
@@ -849,14 +996,27 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
             fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener() {
                 @Override
                 public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful()) {
-                        Location currentLocation = (Location) task.getResult();
-                        LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        try {
+                            Location currentLocation = (Location) task.getResult();
+                            LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-                        googleMap.clear();
+                            Geocoder geocoder = new Geocoder(getApplicationContext());
+                            List<Address> list;
 
-                        googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+                            list = geocoder.getFromLocation(myLocation.latitude, myLocation.longitude, 1);
+                            address = list.get(0);
+
+                            fieldSearch.setText(address.getAddressLine(0));
+
+                            googleMap.clear();
+
+                            googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         Toast.makeText(getApplicationContext(), "Возникла ошибка при определении вашего местоположения!", Toast.LENGTH_SHORT).show();
                     }
@@ -868,7 +1028,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
     }
 
     public void selectLocation(View view) {
-        if (address.getAddressLine(0) != null) {
+        if (address != null) {
             fragmentManager.beginTransaction()
                     .hide(activeFragment)
                     .show(requestFragment)
@@ -900,14 +1060,14 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         }
 
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                place = Autocomplete.getPlaceFromIntent(data);
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
                 fieldSearch.setText(place.getAddress());
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
-                Log.d("TAG", status.getStatusMessage());
+                Log.d("STATUS", status.getStatus().getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
-
+                Log.d("CANCEL", "CANCEL");
             }
         }
     }
@@ -925,7 +1085,17 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
 
         activeFragment = regServiceFragment;
 
+        listViewRegService.setAdapter(null);
+        labelSumPriceRegService.setText("ИТОГО: 0 руб.");
+
         Disposable disposable = regServiceDao.getRegServiceByEquipment(Integer.parseInt(fieldIdEquipment.getText().toString()))
+                .filter(regServiceExtendeds -> {
+                    if (!regServiceExtendeds.isEmpty()) {
+                        return true;
+                    } else {
+                        throw new Exception();
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::addRegService, throwable -> showMessageErrorRegService());
@@ -968,7 +1138,7 @@ public class MainClientActivity extends AppCompatActivity implements AdapterView
         sumPrice += price;
         countServices++;
 
-        if (listServices.size() == countServices) {
+        if (listServices.size() == countServices && listServices.size() != 0) {
             labelSumPriceRegService.setText("ИТОГО: " + Double.toString(sumPrice) + " руб.");
 
             Toast.makeText(getApplicationContext(), "Успешно вычислена сумма оплаты по всему списку оказанных услуг!", Toast.LENGTH_SHORT).show();

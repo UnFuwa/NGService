@@ -108,12 +108,13 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback {
                         googleMap.addMarker(new MarkerOptions().position(myLocation).title("Мое местоположение"));
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
                     } else {
-                        Toast.makeText(context, "Возникла ошибка при определении местоположения!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Ошибка Google Services! (Отсутсвует Интернет подключение или не вкл. передача данных о местоположении)", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(context, "Ошибка Google Services! (Отсутсвует Интернет подключение или не вкл. передача данных о местоположении)", Toast.LENGTH_SHORT).show();
         }
     }
 

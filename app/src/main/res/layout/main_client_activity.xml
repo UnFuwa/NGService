@@ -19,7 +19,7 @@
         app:headerLayout="@layout/header_main_client_menu"
         app:menu="@menu/main_client_menu"
         app:itemTextColor="@color/White"
-        app:itemIconTint="@color/DarkGreenCyan"
+        app:itemIconTint="@drawable/item_selected_bottom_menu"
         app:itemHorizontalPadding="20dp"
         app:itemIconSize="25dp"
         app:itemTextAppearance="@style/TextViewStyle" >

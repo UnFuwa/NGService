@@ -44,7 +44,7 @@
                     android:editable="false"
                     android:ems="10"
                     android:textColorHint="#B5B5B5"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:background="@drawable/input_field"
                     android:textColor="@color/White"
                     android:textAllCaps="false"
@@ -91,7 +91,7 @@
                     android:editable="false"
                     android:ems="10"
                     android:textColorHint="#B5B5B5"
-                    android:inputType="date"
+                    android:inputType="none"
                     android:background="@drawable/input_field"
                     android:textColor="@color/White"
                     android:textAllCaps="false"
@@ -183,7 +183,8 @@
                     android:layout_gravity="right"
                     android:textAllCaps="false"
                     android:textColor="#174A42"
-                    android:textSize="12sp"/>
+                    android:textSize="12sp"
+                    android:enabled="false"/>
 
             </LinearLayout>
 

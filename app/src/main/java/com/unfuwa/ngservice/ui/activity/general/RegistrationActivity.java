@@ -1,6 +1,9 @@
 package com.unfuwa.ngservice.ui.activity.general;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -297,125 +300,134 @@ public class RegistrationActivity extends AppCompatActivity {
         dbApi = DatabaseApi.getInstance(getApplicationContext());
         UserClientDao userClientDao = dbApi.userClientDao();
 
-        firebaseAuth.createUserWithEmailAndPassword(userIn.getLogin(), userIn.getPassword())
-                .addOnCompleteListener(
-                        this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful() && task.isComplete()) {
-                                    task.getResult().getUser().sendEmailVerification()
-                                        .addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
-                                                Toast.makeText(getApplicationContext(), "Регистрация прошла успешно. Пожалуйста проверьте свой email для подтверждения!", Toast.LENGTH_SHORT).show();
+        ConnectivityManager cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                                                Completable completableUser = userClientDao.insertUser(userIn)
-                                                        .subscribeOn(Schedulers.io())
-                                                        .observeOn(AndroidSchedulers.mainThread());
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
-                                                Completable completableClient = userClientDao.insertClient(clientIn)
-                                                        .subscribeOn(Schedulers.io())
-                                                        .observeOn(AndroidSchedulers.mainThread());
+        if (isConnected) {
+            firebaseAuth.createUserWithEmailAndPassword(userIn.getLogin(), userIn.getPassword())
+                    .addOnCompleteListener(
+                            this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful() && task.isComplete()) {
+                                        task.getResult().getUser().sendEmailVerification()
+                                                .addOnCompleteListener(task1 -> {
+                                                    if (task1.isSuccessful() && task1.isComplete()) {
+                                                        Toast.makeText(getApplicationContext(), "Регистрация прошла успешно. Пожалуйста проверьте свой email для подтверждения!", Toast.LENGTH_SHORT).show();
 
-                                                Disposable disposable = Completable.concatArray(completableUser, completableClient)
-                                                        .doOnSubscribe(disposable1 -> verifactionEmailDialog.showVerification())
-                                                        .subscribe(this::verificationEmail, throwable -> showMessageErrorRegClient());
+                                                        Completable completableUser = userClientDao.insertUser(userIn)
+                                                                .subscribeOn(Schedulers.io())
+                                                                .observeOn(AndroidSchedulers.mainThread());
 
-                                                compositeDisposable.add(disposable);
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Невалидный адрес)", Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Аккаунт с данной эл. почтой уже существует!", Toast.LENGTH_SHORT).show();
-                                }
-                            }
+                                                        Completable completableClient = userClientDao.insertClient(clientIn)
+                                                                .subscribeOn(Schedulers.io())
+                                                                .observeOn(AndroidSchedulers.mainThread());
 
-                            private void showMessageErrorRegClient() {
-                                Toast.makeText(getApplicationContext(), "Возникла ошибка во регистрации пользователя! (Неудача выполнение транзакции)", Toast.LENGTH_SHORT).show();
-                            }
+                                                        Disposable disposable = Completable.concatArray(completableUser, completableClient)
+                                                                .doOnSubscribe(disposable1 -> verifactionEmailDialog.showVerification())
+                                                                .subscribe(this::verificationEmail, throwable -> showMessageErrorRegClient());
 
-                            public void verificationEmail() {
-                                AtomicBoolean flag = new AtomicBoolean(true);
-                                firebaseUser = firebaseAuth.getCurrentUser();
-                                firebaseUser.reload();
-
-                                try {
-                                    threadEmailVerify = new Thread(()->{
-                                        while(flag.get()) {
-                                            firebaseUser.reload();
-
-                                            if (firebaseUser.isEmailVerified()) {
-                                                flag.set(false);
-                                                isVerificationEmail = true;
-                                            } else {
-                                                flag.set(true);
-                                            }
-
-                                            try {
-                                                Thread.sleep(3000);
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
-
-                                    threadEmailVerify.start();
-                                    threadEmailVerify.join();
-
-                                    if (isVerificationEmail) {
-                                        startNextActivity();
+                                                        compositeDisposable.add(disposable);
+                                                    } else {
+                                                        Toast.makeText(getApplicationContext(), "Возникла ошибка во время отправки подтверждения эл. почты! (Невалидный адрес эл. почты)", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Аккаунт с данной эл. почтой уже существует!", Toast.LENGTH_SHORT).show();
                                     }
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
                                 }
-                            }
 
-                            public void startNextActivity() {
-                                if (isVerificationEmail) {
-                                    verifactionEmailDialog.hideVerification();
+                                private void showMessageErrorRegClient() {
+                                    Toast.makeText(getApplicationContext(), "Возникла ошибка во регистрации пользователя! (Неудача выполнение транзакции)", Toast.LENGTH_SHORT).show();
+                                }
 
-                                    Toast.makeText(getApplicationContext(), "Адрес электронной почты был подтвержден!", Toast.LENGTH_SHORT).show();
-
-                                    File file = new File(CACHE_PATH);
+                                public void verificationEmail() {
+                                    AtomicBoolean flag = new AtomicBoolean(true);
+                                    firebaseUser = firebaseAuth.getCurrentUser();
+                                    firebaseUser.reload();
 
                                     try {
-                                        if (file.exists()) {
-                                            file.delete();
+                                        threadEmailVerify = new Thread(()->{
+                                            while(flag.get()) {
+                                                firebaseUser.reload();
+
+                                                if (firebaseUser.isEmailVerified()) {
+                                                    flag.set(false);
+                                                    isVerificationEmail = true;
+                                                } else {
+                                                    flag.set(true);
+                                                }
+
+                                                try {
+                                                    Thread.sleep(3000);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+
+                                        threadEmailVerify.start();
+                                        threadEmailVerify.join();
+
+                                        if (isVerificationEmail) {
+                                            startNextActivity();
                                         }
-
-                                        file.createNewFile();
-
-                                        FileWriter writeFile = new FileWriter(file);
-
-                                        writeFile.append(genToken + System.lineSeparator());
-
-                                        writeFile.close();
-
-                                        ClientDao clientDao = dbApi.clientDao();
-
-                                        Disposable disposable = clientDao.getClientByEmail(userIn.getLogin())
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
-
-                                        compositeDisposable.add(disposable);
-                                    } catch (IOException e) {
+                                    } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Адрес электронной почты был не подтвержден!", Toast.LENGTH_SHORT).show();
                                 }
 
-                            }
+                                public void startNextActivity() {
+                                    if (isVerificationEmail) {
+                                        verifactionEmailDialog.hideVerification();
 
-                            private void startMainClientActivity(ClientUser client) {
-                                Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
-                                intent.putExtra("client", client);
-                                startActivity(intent);
+                                        Toast.makeText(getApplicationContext(), "Адрес электронной почты был подтвержден!", Toast.LENGTH_SHORT).show();
+
+                                        File file = new File(CACHE_PATH);
+
+                                        try {
+                                            if (file.exists()) {
+                                                file.delete();
+                                            }
+
+                                            file.createNewFile();
+
+                                            FileWriter writeFile = new FileWriter(file);
+
+                                            writeFile.append(genToken + System.lineSeparator());
+
+                                            writeFile.close();
+
+                                            ClientDao clientDao = dbApi.clientDao();
+
+                                            Disposable disposable = clientDao.getClientByEmail(userIn.getLogin())
+                                                    .subscribeOn(Schedulers.io())
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .subscribe(this::startMainClientActivity, throwable -> showErrorMessage());
+
+                                            compositeDisposable.add(disposable);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Адрес электронной почты был не подтвержден!", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+
+                                private void startMainClientActivity(ClientUser client) {
+                                    Toast.makeText(getApplicationContext(), "Авторизация прошла успешно, получен доступ клиента!", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(getApplicationContext(), MainClientActivity.class);
+                                    intent.putExtra("client", client);
+                                    startActivity(intent);
+                                }
                             }
-                        }
-                );
+                    );
+        } else {
+            Toast.makeText(getApplicationContext(), "Отсутствует подключения к Интернету!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void verificationEmail(View view) {

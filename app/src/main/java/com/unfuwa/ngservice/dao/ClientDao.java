@@ -19,7 +19,7 @@ public interface ClientDao {
     @Query("SELECT * FROM Clients WHERE email = :email")
     Single<ClientUser> getClientByEmail(String email);
 
-    @Query("SELECT EXISTS(SELECT * FROM Clients WHERE email = :email)")
+    @Query("SELECT EXISTS(SELECT * FROM Clients WHERE lower(email) = lower(:email))")
     Single<Integer> hasClientByEmail(String email);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
